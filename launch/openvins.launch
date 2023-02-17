@@ -1,0 +1,9 @@
+<launch>
+
+    <node name="transform_node" type="transform_node" pkg="odom_transform"  output="screen">
+        <param name="config_path"            type="string" value="$(find odom_transform)/config/transform.yaml" />
+        <rosparam file="$(find odom_transform)/config/transform.yaml" />
+    </node>
+
+
+</launch>
