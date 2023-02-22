@@ -2,7 +2,6 @@
 #define ovtransform_CLASS_SRC_ovtransform_CLASS_H_
 
 #include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
 #include <iostream>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
@@ -49,13 +48,13 @@ class Transform_calculator {
 		
 };
 
-Eigen::Matrix<double, 3, 3> skew_x(const Eigen::Matrix<double, 3, 1> &w) {
+inline Eigen::Matrix<double, 3, 3> skew_x(const Eigen::Matrix<double, 3, 1> &w) {
   Eigen::Matrix<double, 3, 3> w_x;
   w_x << 0, -w(2), w(1), w(2), 0, -w(0), -w(1), w(0), 0;
   return w_x;
 }
 
-Eigen::Matrix<double, 3, 3> quat_2_Rot(const Eigen::Matrix<double, 4, 1> &q) {
+inline Eigen::Matrix<double, 3, 3> quat_2_Rot(const Eigen::Matrix<double, 4, 1> &q) {
   Eigen::Matrix<double, 3, 3> q_x = skew_x(q.block(0, 0, 3, 1));
   Eigen::MatrixXd Rot = (2 * std::pow(q(3, 0), 2) - 1) * Eigen::MatrixXd::Identity(3, 3) - 2 * q(3, 0) * q_x +
                         2 * q.block(0, 0, 3, 1) * (q.block(0, 0, 3, 1).transpose());

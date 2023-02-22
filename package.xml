@@ -4,8 +4,8 @@
   <version>0.0.0</version>
   <description>pose in imu frame to body frame transform</description>
 
-  <author email="yangzhou@nyu.edu">Yang Zhou</author>
-  <maintainer email="yangzhou@nyu.edu">Yang Zhou</maintainer>
+  <author email="cw4030@nyu.edu">Chenyu</author>
+  <maintainer email="cw4030@nyu.edu">Chenyu</maintainer>
 
   <license>BSD</license>
 
@@ -14,10 +14,13 @@
   <depend>roscpp</depend>
   <depend>roslib</depend>
   <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
   <build_depend>nodelet</build_depend>
   <exec_depend>nodelet</exec_depend>
 
-    <!-- <export>
+    <export>
         <nodelet plugin="${prefix}/transform_nodelet.xml" />
-    </export> -->
+    </export>
 </package>
+

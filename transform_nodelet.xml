@@ -1,5 +1,5 @@
-<library path="lib/libtransform_nodelet">
-	<class name="transform_nodelet/OvtransformNodeletClass" type="transform_nodelet_ns::OvtransformNodeletClass"
+<library path="lib/libodom_transform_nodelet">
+	<class name="odom_transform_nodelet/OvtransformNodeletClass" type="transform_nodelet_ns::OvtransformNodeletClass"
 		base_class_type="nodelet::Nodelet">
 		<description>
 			OvtransformNodeletClass.

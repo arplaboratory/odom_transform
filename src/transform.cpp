@@ -264,34 +264,34 @@ void Transform_calculator::odomCallback(const nav_msgs::OdometryPtr& msg_in) {
 }
 
 
-int main(int argc, char** argv) {
-  ros::init(argc, argv, "transform_node");
+// int main(int argc, char** argv) {
+//   ros::init(argc, argv, "transform_node");
 
-  std::shared_ptr<ros::NodeHandle> nh = std::make_shared<ros::NodeHandle>("~");
-  std::string config_path;
-  // nh->param<std::string>("config_path", config_path, config_path);
+//   std::shared_ptr<ros::NodeHandle> nh = std::make_shared<ros::NodeHandle>("~");
+//   std::string config_path;
+//   // nh->param<std::string>("config_path", config_path, config_path);
 
-  if( !nh->getParam("config_path", config_path) )
-    ROS_ERROR("Failed to get param config_path from server.");
-  ROS_INFO("Config path: %s", config_path.c_str());
-  ROS_INFO("<<<OvtransformNodeletClass Constructor");
-  nh->param<std::string>("config_path", config_path, config_path);
-  ROS_INFO("<<<OvtransformNodeletClass line 247");
-
-
-  // parser->set_node_handler(nh);
-  ROS_INFO("<<<Line 29");
+//   if( !nh->getParam("config_path", config_path) )
+//     ROS_ERROR("Failed to get param config_path from server.");
+//   ROS_INFO("Config path: %s", config_path.c_str());
+//   ROS_INFO("<<<OvtransformNodeletClass Constructor");
+//   nh->param<std::string>("config_path", config_path, config_path);
+//   ROS_INFO("<<<OvtransformNodeletClass line 247");
 
 
-  ROS_INFO("<<<OvtransformNodeletClass line 256");
-  std::string verbosity = "DEBUG";
-  // parser->parse_config("verbosity", verbosity);
-  ROS_INFO("<<<OvtransformNodeletClass Constructor 111");
-  auto trans_cal=Transform_calculator(nh);
-  trans_cal.setup();
+//   // parser->set_node_handler(nh);
+//   ROS_INFO("<<<Line 29");
 
-  ros::spin();
 
-  return 0;
-}
+//   ROS_INFO("<<<OvtransformNodeletClass line 256");
+//   std::string verbosity = "DEBUG";
+//   // parser->parse_config("verbosity", verbosity);
+//   ROS_INFO("<<<OvtransformNodeletClass Constructor 111");
+//   auto trans_cal=Transform_calculator(nh);
+//   trans_cal.setup();
+
+//   ros::spin();
+
+//   return 0;
+// }
 
