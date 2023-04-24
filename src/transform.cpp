@@ -7,7 +7,7 @@ Transform_calculator::Transform_calculator(std::shared_ptr<ros::NodeHandle>  nod
   nh(nodeHandle){}
 
 void Transform_calculator::setup() {
-  sub_odomimu = nh->subscribe("/OvmsckfNodeletClass_loader/odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
+  sub_odomimu = nh->subscribe("OvmsckfNodeletClass_loader/odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
   pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 100);
   pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 100);
   ROS_INFO("<<<<<<>>>>>>Publishing: %s\n", pub_odomworldB0.getTopic().c_str());
