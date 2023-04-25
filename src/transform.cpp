@@ -109,7 +109,7 @@ void Transform_calculator::setupTransformationMatrix(){
 
 
 
-void Transform_calculator::odomCallback(const nav_msgs::OdometryPtr& msg_in) {
+void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in) {
   nav_msgs::Odometry odomIinM = *msg_in;
 
   if (!got_init_tf){
