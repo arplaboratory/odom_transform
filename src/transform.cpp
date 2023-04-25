@@ -7,7 +7,7 @@ Transform_calculator::Transform_calculator(std::shared_ptr<ros::NodeHandle>  nod
   nh(nodeHandle){}
 
 void Transform_calculator::setup() {
-  sub_odomimu = nh->subscribe("OvmsckfNodeletClass_loader/odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
+  sub_odomimu = nh->subscribe("odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
   pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 100);
   pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 100);
   ROS_INFO("<<<<<<>>>>>>Publishing: %s\n", pub_odomworldB0.getTopic().c_str());
@@ -89,22 +89,6 @@ void Transform_calculator::setupTransformationMatrix(){
     T_BtoI.block(0,0,3,3) = T_ItoB.block(0,0,3,3).transpose();
     T_BtoI.block(0,3,3,1) = -T_ItoB.block(0,0,3,3).transpose() * T_ItoB.block(0,3,3,1);
     T_MtoW = T_B0toW * T_ItoB; // T_ItoW at zero timestamp
-    // PRINT_INFO("odom_transform T_ItoC");
-    // print_tf(T_ItoC);
-
-    // PRINT_INFO("odom_transform T_CtoB");
-    // print_tf(T_CtoB);
-
-    // PRINT_INFO("odom_transform T_ItoB");
-    // print_tf(T_ItoB);
-
-    // PRINT_INFO("odom_transform T_BtoI");
-    // print_tf(T_BtoI);
-
-    // PRINT_INFO("odom_transform T_MtoW");
-    // T_MtoW_eigen = print_tf(T_MtoW);
-    // PRINT_INFO("odom_transform T_B0toW");
-    // print_tf(T_B0toW);
 }
 
 
@@ -114,23 +98,10 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
 
   if (!got_init_tf){
    
-    //state(0) is the timestamp;
-    // Eigen::MatrixXd state_est = state->_imu->value();
-    // Eigen::Quaterniond q_init_tf;
-    // q_init_tf.x() = odomIinM.pose.pose.orientation.x;
-    // q_init_tf.y() = odomIinM.pose.pose.orientation.y;
-    // q_init_tf.z() = odomIinM.pose.pose.orientation.z;
-    // q_init_tf.w() = odomIinM.pose.pose.orientation.w;
-    
-    // T_init_tf.block(0,0,3,3) =  q_init_tf.normalized().toRotationMatrix();
     T_init_tf(0, 3) = odomIinM.pose.pose.position.x;
     T_init_tf(1, 3) = odomIinM.pose.pose.position.y;
     T_init_tf(2, 3) = odomIinM.pose.pose.position.z;
-    //T_init_tf = T_correct * T_init_tf;
-    // PRINT_INFO("T_init_tf\n");
-     Eigen::Matrix<double, 4,1> q_init_tf;
-    //state(0) is the timestamp;
-    // Eigen::MatrixXd state_est = state->_imu->value();
+    Eigen::Matrix<double, 4,1> q_init_tf;
     q_init_tf <<odomIinM.pose.pose.orientation.x, odomIinM.pose.pose.orientation.y, odomIinM.pose.pose.orientation.z, odomIinM.pose.pose.orientation.w;
     T_init_tf.block(0,0,3,3) = quat_2_Rot(q_init_tf).transpose();
 
@@ -262,36 +233,3 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     pub_odomworldB0.publish(odomBinB0);
   
 }
-
-
-// int main(int argc, char** argv) {
-//   ros::init(argc, argv, "transform_node");
-
-//   std::shared_ptr<ros::NodeHandle> nh = std::make_shared<ros::NodeHandle>("~");
-//   std::string config_path;
-//   // nh->param<std::string>("config_path", config_path, config_path);
-
-//   if( !nh->getParam("config_path", config_path) )
-//     ROS_ERROR("Failed to get param config_path from server.");
-//   ROS_INFO("Config path: %s", config_path.c_str());
-//   ROS_INFO("<<<OvtransformNodeletClass Constructor");
-//   nh->param<std::string>("config_path", config_path, config_path);
-//   ROS_INFO("<<<OvtransformNodeletClass line 247");
-
-
-//   // parser->set_node_handler(nh);
-//   ROS_INFO("<<<Line 29");
-
-
-//   ROS_INFO("<<<OvtransformNodeletClass line 256");
-//   std::string verbosity = "DEBUG";
-//   // parser->parse_config("verbosity", verbosity);
-//   ROS_INFO("<<<OvtransformNodeletClass Constructor 111");
-//   auto trans_cal=Transform_calculator(nh);
-//   trans_cal.setup();
-
-//   ros::spin();
-
-//   return 0;
-// }
-
