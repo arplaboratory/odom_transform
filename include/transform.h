@@ -15,7 +15,7 @@ class Transform_calculator {
 
 		void setup();
 	private:
-		void odomCallback(const nav_msgs::OdometryPtr& msg_in);
+		void odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in);
         void setupTransformationMatrix();
         Eigen::Matrix<double, 7, 1> print_tf(Eigen::Matrix4d T);
 
