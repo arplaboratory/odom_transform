@@ -1,5 +1,5 @@
 <launch>
-    <arg name="mav_name" default="$(env MAV_NAME)"/>
+    <arg name="mav_name" default="$(optenv MAV_NAME quadrotor)"/>
 
     <group ns="$(arg mav_name)">
         <!--node pkg="nodelet" type="nodelet" args="manager"
