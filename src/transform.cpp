@@ -109,6 +109,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     T_init_tf_inv.block(0,0,3,3) = T_init_tf.block(0,0,3,3).transpose();
     T_init_tf_inv.block(0,3,3,1) = -T_init_tf.block(0,0,3,3).transpose()*T_init_tf.block(0,3,3,1);
     T_MtoW = T_MtoW*T_init_tf;
+    //T_MtoW = T_init_tf*T_MtoW;
     std::cout << T_MtoW << std::endl;
     got_init_tf = true;
   }
@@ -138,8 +139,9 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     T_ItoW = T_MtoW*T_ItoM;
 
     // TRANSLATION SOLVED if using JPL convention
-    T_ItoM.block(0,3,3,1) = T_init_tf_inv.block(0,0,3,3) * T_ItoM.block(0,3,3,1); 
-    T_ItoM.block(0,0,3,3) = T_init_tf_inv.block(0,0,3,3) * T_ItoM.block(0,0,3,3) ; 
+    //T_ItoM.block(0,3,3,1) = T_init_tf_inv.block(0,0,3,3) * T_ItoM.block(0,3,3,1); 
+    //T_ItoM.block(0,0,3,3) = T_init_tf_inv.block(0,0,3,3) * T_ItoM.block(0,0,3,3) ; 
+    T_ItoM = T_init_tf_inv * T_ItoM;
     // The TF that is required for flight test
     Eigen::Matrix4d T_BtoB0 = (T_ItoB * T_ItoM * T_BtoI);
     
