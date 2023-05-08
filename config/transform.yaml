@@ -1,5 +1,5 @@
-imu_rate: 400.0
-odom_rate: 120.0
+imu_rate: 200.0
+odom_rate: 100.0
 
 T_cam_imu:
   r0: {c0: 1.0, c1: 0.0, c2: 0.0, c3: -0.04402011600452833}
