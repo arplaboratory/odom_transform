@@ -95,6 +95,13 @@ void Transform_calculator::setupTransformationMatrix(){
 
 void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in) {
   nav_msgs::Odometry odomIinM = *msg_in;
+  double current_timestamp = ros::Time::now().toSec();
+  if ((current_timestamp - last_timestamp) >=  pub_frequency){
+	  last_timestamp = current_timestamp;
+	  return;
+  }
+
+
 
   if (!got_init_tf){
    

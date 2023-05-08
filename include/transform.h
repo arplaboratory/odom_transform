@@ -42,9 +42,9 @@ class Transform_calculator {
         int skip_count = 0;
 
         double pub_frequency = 0.0;
+	double last_timestamp = -1;
         float imu_rate = 0;
         float odom_rate = 0;
-        double last_timestamp = 0;
 		
 };
 
