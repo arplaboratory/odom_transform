@@ -10,13 +10,13 @@ void Transform_calculator::setup() {
   sub_odomimu = nh->subscribe("odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
   pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 100);
   pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 100);
-  ROS_INFO("<<<<<<>>>>>>Publishing: %s\n", pub_odomworldB0.getTopic().c_str());
-  ROS_INFO("<<<<<<>>>>>>Publishing: %s\n", pub_odomworld.getTopic().c_str());
+  ROS_INFO("[odom_transform] Publishing: %s", pub_odomworldB0.getTopic().c_str());
+  ROS_INFO("[odom_transform] Publishing: %s", pub_odomworld.getTopic().c_str());
   setupTransformationMatrix();
   nh->getParam("imu_rate", imu_rate);
   nh->getParam("odom_rate", odom_rate);
-  ROS_INFO("<<<<<<>>>>>>Read from yaml: %f\n",imu_rate);
-  ROS_INFO("<<<<<<>>>>>>Read from yaml: %f\n", odom_rate);
+  ROS_INFO("[odom_transform] imu_rate: %f",imu_rate);
+  ROS_INFO("[odom_transform] odom_rate: %f", odom_rate);
 
 }
 
