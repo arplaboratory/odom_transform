@@ -12,11 +12,11 @@ void Transform_calculator::setup() {
   pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 100);
   ROS_INFO("[odom_transform] Publishing: %s", pub_odomworldB0.getTopic().c_str());
   ROS_INFO("[odom_transform] Publishing: %s", pub_odomworld.getTopic().c_str());
-  setupTransformationMatrix();
   nh->getParam("imu_rate", imu_rate);
   nh->getParam("odom_rate", odom_rate);
   ROS_INFO("[odom_transform] imu_rate: %f",imu_rate);
   ROS_INFO("[odom_transform] odom_rate: %f", odom_rate);
+  setupTransformationMatrix();
 
 }
 
@@ -240,5 +240,4 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
 
     odomBinB0.pose.covariance = odomIinM.pose.covariance;
     pub_odomworldB0.publish(odomBinB0);
-  
 }
