@@ -121,13 +121,13 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     got_init_tf = true;
   }
 
-  nav_msgs::Odometry odomBinW;
-  odomBinW.header.stamp = odomIinM.header.stamp;
-  odomBinW.header.frame_id = "odom";
+  nav_msgs::OdometryPtr odomBinW(new nav_msgs::Odometry);
+  odomBinW->header.stamp = odomIinM.header.stamp;
+  odomBinW->header.frame_id = "odom";
 
-  nav_msgs::Odometry odomBinB0 ;
-  odomBinB0.header.stamp = odomIinM.header.stamp;
-  odomBinB0.header.frame_id = "odom";
+  nav_msgs::OdometryPtr odomBinB0(new nav_msgs::Odometry);
+  odomBinB0->header.stamp = odomIinM.header.stamp;
+  odomBinB0->header.frame_id = "odom";
 
 
     Eigen::Matrix<double, 4,1> q_GinI_eigen;
@@ -191,40 +191,40 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     // Eigen::Vector3d v_BinB0 = T_MtoB0.block(0,0,3,3)* v_BinB ;
 
     // The POSE component (orientation and position)
-    odomBinW.pose.pose.orientation.x = q_BinW.x();
-    odomBinW.pose.pose.orientation.y = q_BinW.y();  
-    odomBinW.pose.pose.orientation.z = q_BinW.z();
-    odomBinW.pose.pose.orientation.w = q_BinW.w();
-    odomBinW.pose.pose.position.x = position_BinW(0); 
-    odomBinW.pose.pose.position.y = position_BinW(1); 
-    odomBinW.pose.pose.position.z = position_BinW(2);
+    odomBinW->pose.pose.orientation.x = q_BinW.x();
+    odomBinW->pose.pose.orientation.y = q_BinW.y();  
+    odomBinW->pose.pose.orientation.z = q_BinW.z();
+    odomBinW->pose.pose.orientation.w = q_BinW.w();
+    odomBinW->pose.pose.position.x = position_BinW(0); 
+    odomBinW->pose.pose.position.y = position_BinW(1); 
+    odomBinW->pose.pose.position.z = position_BinW(2);
     
-    odomBinB0.pose.pose.orientation.x = q_BinB0.x();
-    odomBinB0.pose.pose.orientation.y = q_BinB0.y();
-    odomBinB0.pose.pose.orientation.z = q_BinB0.z();
-    odomBinB0.pose.pose.orientation.w = q_BinB0.w();
-    odomBinB0.pose.pose.position.x = position_BinB0(0); 
-    odomBinB0.pose.pose.position.y = position_BinB0(1); 
-    odomBinB0.pose.pose.position.z = position_BinB0(2);
+    odomBinB0->pose.pose.orientation.x = q_BinB0.x();
+    odomBinB0->pose.pose.orientation.y = q_BinB0.y();
+    odomBinB0->pose.pose.orientation.z = q_BinB0.z();
+    odomBinB0->pose.pose.orientation.w = q_BinB0.w();
+    odomBinB0->pose.pose.position.x = position_BinB0(0); 
+    odomBinB0->pose.pose.position.y = position_BinB0(1); 
+    odomBinB0->pose.pose.position.z = position_BinB0(2);
     
     // The TWIST component (angular and linear velocities)
-    odomBinW.child_frame_id = "body";
-    odomBinW.twist.twist.linear.x = v_BinW(0);   // vel in world frame
-    odomBinW.twist.twist.linear.y = v_BinW(1);   // vel in world frame
-    odomBinW.twist.twist.linear.z = v_BinW(2);   // vel in world frame
-    odomBinW.twist.twist.angular.x = w_BinB(0); // we do not estimate this...
-    odomBinW.twist.twist.angular.y = w_BinB(1); // we do not estimate this...
-    odomBinW.twist.twist.angular.z = w_BinB(2);; // we do not estimate this...
+    odomBinW->child_frame_id = "body";
+    odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
+    odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
+    odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
+    odomBinW->twist.twist.angular.x = w_BinB(0); // we do not estimate this...
+    odomBinW->twist.twist.angular.y = w_BinB(1); // we do not estimate this...
+    odomBinW->twist.twist.angular.z = w_BinB(2);; // we do not estimate this...
 
-    odomBinB0.child_frame_id = "body";
-    odomBinB0.twist.twist.linear.x = v_BinB0(0);   // vel in world frame
-    odomBinB0.twist.twist.linear.y = v_BinB0(1);   // vel in world frame
-    odomBinB0.twist.twist.linear.z = v_BinB0(2);   // vel in world frame
-    odomBinB0.twist.twist.angular.x = w_BinB(0); // we do not estimate this...
-    odomBinB0.twist.twist.angular.y = w_BinB(1); // we do not estimate this...
-    odomBinB0.twist.twist.angular.z = w_BinB(2); // we do not estimate this...
+    odomBinB0->child_frame_id = "body";
+    odomBinB0->twist.twist.linear.x = v_BinB0(0);   // vel in world frame
+    odomBinB0->twist.twist.linear.y = v_BinB0(1);   // vel in world frame
+    odomBinB0->twist.twist.linear.z = v_BinB0(2);   // vel in world frame
+    odomBinB0->twist.twist.angular.x = w_BinB(0); // we do not estimate this...
+    odomBinB0->twist.twist.angular.y = w_BinB(1); // we do not estimate this...
+    odomBinB0->twist.twist.angular.z = w_BinB(2); // we do not estimate this...
 
-    odomBinW.pose.covariance = odomIinM.pose.covariance;
+    odomBinW->pose.covariance = odomIinM.pose.covariance;
     
     // if ( odomBinW.pose.covariance(0) > 0.05){
     //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n",  odomBinW.pose.covariance(0));
@@ -238,6 +238,6 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
       
     pub_odomworld.publish(odomBinW);
 
-    odomBinB0.pose.covariance = odomIinM.pose.covariance;
+    odomBinB0->pose.covariance = odomIinM.pose.covariance;
     pub_odomworldB0.publish(odomBinB0);
 }
