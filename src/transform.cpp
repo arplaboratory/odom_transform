@@ -5,6 +5,7 @@ using namespace odom_transform;
 
 Transform_calculator::Transform_calculator(std::shared_ptr<ros::NodeHandle>  nodeHandle):
   nh(nodeHandle){}
+
 void Transform_calculator::setup() {
   sub_odomimu = nh->subscribe("odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
   pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 100);
@@ -17,6 +18,7 @@ void Transform_calculator::setup() {
   ROS_INFO("[odom_transform] odom_rate: %f", odom_rate);
   pub_frequency = 1.0/odom_rate;
   setupTransformationMatrix();
+
 }
 
 void Transform_calculator::setupTransformationMatrix(){
@@ -72,21 +74,23 @@ void Transform_calculator::setupTransformationMatrix(){
 
 
 
-void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &odomIinM) {
+void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in) {
+  nav_msgs::Odometry odomIinM = *msg_in;
   double current_timestamp = ros::Time::now().toSec();
-  if ((current_timestamp - last_timestamp) < pub_frequency){
+  if ((current_timestamp - last_timestamp) >=  pub_frequency){
+	  last_timestamp = current_timestamp;
 	  return;
   }
-  last_timestamp = current_timestamp;
+
 
 
   if (!got_init_tf){
    
-    T_init_tf(0, 3) = odomIinM->pose.pose.position.x;
-    T_init_tf(1, 3) = odomIinM->pose.pose.position.y;
-    T_init_tf(2, 3) = odomIinM->pose.pose.position.z;
+    T_init_tf(0, 3) = odomIinM.pose.pose.position.x;
+    T_init_tf(1, 3) = odomIinM.pose.pose.position.y;
+    T_init_tf(2, 3) = odomIinM.pose.pose.position.z;
     Eigen::Matrix<double, 4,1> q_init_tf;
-    q_init_tf <<odomIinM->pose.pose.orientation.x, odomIinM->pose.pose.orientation.y, odomIinM->pose.pose.orientation.z, odomIinM->pose.pose.orientation.w;
+    q_init_tf <<odomIinM.pose.pose.orientation.x, odomIinM.pose.pose.orientation.y, odomIinM.pose.pose.orientation.z, odomIinM.pose.pose.orientation.w;
     T_init_tf.block(0,0,3,3) = quat_2_Rot(q_init_tf).transpose();
 
     std::cout << T_init_tf << std::endl;
@@ -99,23 +103,23 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &odom
   }
 
   nav_msgs::OdometryPtr odomBinW(new nav_msgs::Odometry);
-  odomBinW->header.stamp = odomIinM->header.stamp;
+  odomBinW->header.stamp = odomIinM.header.stamp;
   odomBinW->header.frame_id = "odom";
 
   nav_msgs::OdometryPtr odomBinB0(new nav_msgs::Odometry);
-  odomBinB0->header.stamp = odomIinM->header.stamp;
+  odomBinB0->header.stamp = odomIinM.header.stamp;
   odomBinB0->header.frame_id = "odom";
 
 
     Eigen::Matrix<double, 4,1> q_GinI_eigen;
-    q_GinI_eigen << odomIinM->pose.pose.orientation.x, odomIinM->pose.pose.orientation.y, odomIinM->pose.pose.orientation.z, odomIinM->pose.pose.orientation.w;;
+    q_GinI_eigen << odomIinM.pose.pose.orientation.x, odomIinM.pose.pose.orientation.y, odomIinM.pose.pose.orientation.z, odomIinM.pose.pose.orientation.w;;
 
     Eigen::Matrix4d T_ItoM = Eigen::Matrix4d::Identity(); // from odomIinM
     T_ItoM.block(0,0,3,3) = quat_2_Rot(q_GinI_eigen).transpose(); // this is right-handed JPL->right-handed
 
-    T_ItoM(0, 3) = odomIinM->pose.pose.position.x;
-    T_ItoM(1, 3) = odomIinM->pose.pose.position.y;
-    T_ItoM(2, 3) = odomIinM->pose.pose.position.z; 
+    T_ItoM(0, 3) = odomIinM.pose.pose.position.x;
+    T_ItoM(1, 3) = odomIinM.pose.pose.position.y;
+    T_ItoM(2, 3) = odomIinM.pose.pose.position.z; 
     
     Eigen::Matrix4d T_ItoB0 = Eigen::Matrix4d::Identity(); // from odomIinM
     Eigen::Matrix4d T_ItoW = Eigen::Matrix4d::Identity(); // from odomIinM
@@ -147,9 +151,9 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &odom
     Eigen::Vector4d position_BinB0 (T_BtoB0(0,3), T_BtoB0(1,3), T_BtoB0(2,3), T_BtoB0(3,3));
     Eigen::Matrix3d skew_ItoB;
     skew_ItoB << 0,-T_ItoB(2,3), T_ItoB(1,3), T_ItoB(2,3), 0, -T_ItoB(0,3), -T_ItoB(1,3),T_ItoB(0,3), 0;
-    Eigen::Vector3d v_iinIMU (odomIinM->twist.twist.linear.x, odomIinM->twist.twist.linear.y, odomIinM->twist.twist.linear.z);
-    Eigen::Vector3d w_BinB (odomIinM->twist.twist.angular.x, odomIinM->twist.twist.angular.y, odomIinM->twist.twist.angular.z);
-    Eigen::Vector3d w_iinIMU (odomIinM->twist.twist.angular.x, odomIinM->twist.twist.angular.y, odomIinM->twist.twist.angular.z);
+    Eigen::Vector3d v_iinIMU (odomIinM.twist.twist.linear.x, odomIinM.twist.twist.linear.y, odomIinM.twist.twist.linear.z);
+    Eigen::Vector3d w_BinB (odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y, odomIinM.twist.twist.angular.z);
+    Eigen::Vector3d w_iinIMU (odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y, odomIinM.twist.twist.angular.z);
     Eigen::Vector3d v_BinB = - T_ItoB.block(0,0,3,3) *skew_ItoB * w_iinIMU + T_ItoB.block(0,0,3,3) * v_iinIMU ;
     Eigen::Quaterniond T_BinB0_from_q;
     Eigen::Quaterniond T_BinW_from_q;
@@ -201,7 +205,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &odom
     odomBinB0->twist.twist.angular.y = w_BinB(1); // we do not estimate this...
     odomBinB0->twist.twist.angular.z = w_BinB(2); // we do not estimate this...
 
-    odomBinW->pose.covariance = odomIinM->pose.covariance;
+    odomBinW->pose.covariance = odomIinM.pose.covariance;
     
     // if ( odomBinW.pose.covariance(0) > 0.05){
     //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n",  odomBinW.pose.covariance(0));
@@ -215,6 +219,6 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &odom
       
     pub_odomworld.publish(odomBinW);
 
-    odomBinB0->pose.covariance = odomIinM->pose.covariance;
+    odomBinB0->pose.covariance = odomIinM.pose.covariance;
     pub_odomworldB0.publish(odomBinB0);
 }
