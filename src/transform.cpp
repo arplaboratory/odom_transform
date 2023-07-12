@@ -15,6 +15,7 @@ void Transform_calculator::setup() {
   nh->getParam("odom_rate", odom_rate);
   ROS_INFO("[odom_transform] imu_rate: %f",imu_rate);
   ROS_INFO("[odom_transform] odom_rate: %f", odom_rate);
+  pub_frequency = 1.0/odom_rate;
   setupTransformationMatrix();
 }
 
@@ -23,34 +24,14 @@ void Transform_calculator::setupTransformationMatrix(){
   Eigen::Matrix4d T_ItoC = Eigen::Matrix4d::Identity();
   Eigen::Matrix4d T_CtoB = Eigen::Matrix4d::Identity();
 
-  nh->getParam("T_cam_imu/r0/c0", T_ItoC(0,0));
-  nh->getParam("T_cam_imu/r0/c1", T_ItoC(0,1));
-  nh->getParam("T_cam_imu/r0/c2", T_ItoC(0,2));
-  nh->getParam("T_cam_imu/r0/c3", T_ItoC(0,3));
-  nh->getParam("T_cam_imu/r1/c0", T_ItoC(1,0));
-  nh->getParam("T_cam_imu/r1/c1", T_ItoC(1,1));
-  nh->getParam("T_cam_imu/r1/c2", T_ItoC(1,2));
-  nh->getParam("T_cam_imu/r1/c3", T_ItoC(1,3));
-  nh->getParam("T_cam_imu/r2/c0", T_ItoC(2,0));
-  nh->getParam("T_cam_imu/r2/c1", T_ItoC(2,1));
-  nh->getParam("T_cam_imu/r2/c2", T_ItoC(2,2));
-  nh->getParam("T_cam_imu/r2/c3", T_ItoC(2,3));
-
-  nh->getParam("T_cam_body/r0/c0", T_CtoB(0,0));
-  nh->getParam("T_cam_body/r0/c1", T_CtoB(0,1));
-  nh->getParam("T_cam_body/r0/c2", T_CtoB(0,2));
-  nh->getParam("T_cam_body/r0/c3", T_CtoB(0,3));
-  nh->getParam("T_cam_body/r1/c0", T_CtoB(1,0));
-  nh->getParam("T_cam_body/r1/c1", T_CtoB(1,1));
-  nh->getParam("T_cam_body/r1/c2", T_CtoB(1,2));
-  nh->getParam("T_cam_body/r1/c3", T_CtoB(1,3));
-  nh->getParam("T_cam_body/r2/c0", T_CtoB(2,0));
-  nh->getParam("T_cam_body/r2/c1", T_CtoB(2,1));
-  nh->getParam("T_cam_body/r2/c2", T_CtoB(2,2));
-  nh->getParam("T_cam_body/r2/c3", T_CtoB(2,3));
+    for(int r=0; r<3; r++){
+        for(int c=0; c<4; c++){
+            nh->getParam("T_cam_imu/r"+std::to_string(r)+"/c"+std::to_string(c), T_ItoC(r,c));
+            nh->getParam("T_cam_body/r"+std::to_string(r)+"/c"+std::to_string(c), T_CtoB(r,c));
+        }
+    }
 
 
-  pub_frequency = 1.0/odom_rate;
 
   // TODO: Check this part with Vicon later  
   bool init_world_with_vicon = false;
@@ -83,7 +64,7 @@ void Transform_calculator::setupTransformationMatrix(){
   //     exit(1);
   //   }
   // } 
-    T_ItoB = T_CtoB *T_ItoC; //* T_correct ;
+    T_ItoB = T_CtoB * T_ItoC; //* T_correct ;
     T_BtoI.block(0,0,3,3) = T_ItoB.block(0,0,3,3).transpose();
     T_BtoI.block(0,3,3,1) = -T_ItoB.block(0,0,3,3).transpose() * T_ItoB.block(0,3,3,1);
     T_MtoW = T_B0toW * T_ItoB; // T_ItoW at zero timestamp
@@ -138,8 +119,8 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &odom
     
     Eigen::Matrix4d T_ItoB0 = Eigen::Matrix4d::Identity(); // from odomIinM
     Eigen::Matrix4d T_ItoW = Eigen::Matrix4d::Identity(); // from odomIinM
-    T_ItoB0 = T_MtoB0*T_ItoM;
-    T_ItoW = T_MtoW*T_ItoM;
+    T_ItoB0 = T_MtoB0 * T_ItoM;
+    T_ItoW = T_MtoW * T_ItoM;
 
     // TRANSLATION SOLVED if using JPL convention
     //T_ItoM.block(0,3,3,1) = T_init_tf_inv.block(0,0,3,3) * T_ItoM.block(0,3,3,1); 
