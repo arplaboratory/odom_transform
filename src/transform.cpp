@@ -108,7 +108,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &odom
 
 
     Eigen::Matrix<double, 4,1> q_GinI_eigen;
-    q_GinI_eigen << odomIinM->pose.pose.orientation.x, odomIinM->pose.pose.orientation.y, odomIin->pose.pose.orientation.z, odomIinM->pose.pose.orientation.w;;
+    q_GinI_eigen << odomIinM->pose.pose.orientation.x, odomIinM->pose.pose.orientation.y, odomIinM->pose.pose.orientation.z, odomIinM->pose.pose.orientation.w;;
 
     Eigen::Matrix4d T_ItoM = Eigen::Matrix4d::Identity(); // from odomIinM
     T_ItoM.block(0,0,3,3) = quat_2_Rot(q_GinI_eigen).transpose(); // this is right-handed JPL->right-handed

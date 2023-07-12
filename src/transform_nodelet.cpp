@@ -3,6 +3,12 @@
 using namespace odom_transform;
 namespace transform_nodelet_ns
 {
+OvtransformNodeletClass::OvtransformNodeletClass()
+{
+}
+OvtransformNodeletClass::~OvtransformNodeletClass()
+{
+}
 void OvtransformNodeletClass::onInit()
 {
   std::shared_ptr<ros::NodeHandle> nh = std::make_shared<ros::NodeHandle>(getMTPrivateNodeHandle());
