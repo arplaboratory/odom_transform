@@ -84,8 +84,8 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
   //double current_timestamp = ros::Time::now().toSec();
   start_ = high_resolution_clock::now();
   elapsed_time_ = start_ - last_time_;
-  std::cout<<"elapsed_time_:" << elapsed_time_.count() << std::endl;
-   std::cout<<"pub_frequency:" << pub_frequency << std::endl;
+  
+  
   if (elapsed_time_.count() <=  pub_frequency){
   	  return;
   }
