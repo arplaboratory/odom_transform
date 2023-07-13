@@ -5,6 +5,7 @@
 #include <iostream>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
+#include <chrono>
 #include <Eigen/Eigen>
 
 namespace odom_transform{
@@ -41,8 +42,8 @@ class Transform_calculator {
 
         int skip_count = 0;
 
-        double pub_frequency = 0.0;
-	double last_timestamp = -1;
+        float pub_frequency = 0.0;
+	//double last_timestamp = -1;
         float imu_rate = 0;
         float odom_rate = 0;
 		

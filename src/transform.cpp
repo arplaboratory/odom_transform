@@ -2,14 +2,19 @@
 #include <nodelet/nodelet.h>
 
 using namespace odom_transform;
+using namespace std::chrono;
+
+auto start_ = high_resolution_clock::now();
+auto last_time_ = high_resolution_clock::now();
+duration<float> elapsed_time_ = start_ - last_time_;
 
 Transform_calculator::Transform_calculator(std::shared_ptr<ros::NodeHandle>  nodeHandle):
   nh(nodeHandle){}
 
 void Transform_calculator::setup() {
-  sub_odomimu = nh->subscribe("odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
-  pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 100);
-  pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 100);
+  sub_odomimu = nh->subscribe("odomimu", 1, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
+  pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 1);
+  pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 1);
   ROS_INFO("[odom_transform] Publishing: %s", pub_odomworldB0.getTopic().c_str());
   ROS_INFO("[odom_transform] Publishing: %s", pub_odomworld.getTopic().c_str());
   nh->getParam("imu_rate", imu_rate);
@@ -95,13 +100,16 @@ void Transform_calculator::setupTransformationMatrix(){
 
 void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in) {
   nav_msgs::Odometry odomIinM = *msg_in;
-  double current_timestamp = ros::Time::now().toSec();
-  if ((current_timestamp - last_timestamp) >=  pub_frequency){
-	  last_timestamp = current_timestamp;
-	  return;
+  //double current_timestamp = ros::Time::now().toSec();
+  start_ = high_resolution_clock::now();
+  elapsed_time_ = start_ - last_time_;
+  std::cout<<"elapsed_time_:" << elapsed_time_.count() << std::endl;
+   std::cout<<"pub_frequency:" << pub_frequency << std::endl;
+  if (elapsed_time_.count() <=  pub_frequency){
+  	  return;
   }
 
-
+  last_time_ = start_;
 
   if (!got_init_tf){
    
