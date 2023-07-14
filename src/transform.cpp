@@ -4,10 +4,6 @@
 using namespace odom_transform;
 using namespace std::chrono;
 
-auto start_ = high_resolution_clock::now();
-auto last_time_ = high_resolution_clock::now();
-duration<float> elapsed_time_ = start_ - last_time_;
-
 Transform_calculator::Transform_calculator(std::shared_ptr<ros::NodeHandle>  nodeHandle):
   nh(nodeHandle){}
 
@@ -81,16 +77,11 @@ void Transform_calculator::setupTransformationMatrix(){
 
 void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in) {
   nav_msgs::Odometry odomIinM = *msg_in;
-  //double current_timestamp = ros::Time::now().toSec();
-  start_ = high_resolution_clock::now();
-  elapsed_time_ = start_ - last_time_;
-  
-  
-  if (elapsed_time_.count() <=  pub_frequency){
-  	  return;
+  double current_timestamp = ros::Time::now().toSec();
+  if ((current_timestamp - last_timestamp) <=  pub_frequency){
+	  return;
   }
-
-  last_time_ = start_;
+  last_timestamp = current_timestamp;
 
   if (!got_init_tf){
    
