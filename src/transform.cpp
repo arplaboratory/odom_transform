@@ -7,9 +7,9 @@ Transform_calculator::Transform_calculator(std::shared_ptr<ros::NodeHandle>  nod
   nh(nodeHandle){}
 
 void Transform_calculator::setup() {
-  sub_odomimu = nh->subscribe("odomimu", 100, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
-  pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 100);
-  pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 100);
+  sub_odomimu = nh->subscribe("odomimu", 1, &Transform_calculator::odomCallback, this, ros::TransportHints().tcpNoDelay());
+  pub_odomworldB0 = nh->advertise<nav_msgs::Odometry>("odomBinB0_from_transform", 1);
+  pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 1);
   ROS_INFO("[odom_transform] Publishing: %s", pub_odomworldB0.getTopic().c_str());
   ROS_INFO("[odom_transform] Publishing: %s", pub_odomworld.getTopic().c_str());
   nh->getParam("imu_rate", imu_rate);
@@ -77,12 +77,10 @@ void Transform_calculator::setupTransformationMatrix(){
 void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in) {
   nav_msgs::Odometry odomIinM = *msg_in;
   double current_timestamp = ros::Time::now().toSec();
-  if ((current_timestamp - last_timestamp) >=  pub_frequency){
-	  last_timestamp = current_timestamp;
+  if ((current_timestamp - last_timestamp) <=  pub_frequency){
 	  return;
   }
-
-
+  last_timestamp = current_timestamp;
 
   if (!got_init_tf){
    
