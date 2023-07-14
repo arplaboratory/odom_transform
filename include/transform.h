@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <chrono>
 #include <Eigen/Eigen>
+#include <chrono>
 
 namespace odom_transform{
 
@@ -43,7 +44,8 @@ class Transform_calculator {
         int skip_count = 0;
 
         double pub_frequency = 0.0;
-	double last_timestamp = -1;
+	std::chrono::high_resolution_clock::time_point last_timestamp{};
+	std::chrono::high_resolution_clock::time_point current_timestamp{};
         float imu_rate = 0;
         float odom_rate = 0;
 		

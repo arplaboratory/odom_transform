@@ -2,7 +2,6 @@
 #include <nodelet/nodelet.h>
 
 using namespace odom_transform;
-using namespace std::chrono;
 
 Transform_calculator::Transform_calculator(std::shared_ptr<ros::NodeHandle>  nodeHandle):
   nh(nodeHandle){}
@@ -33,8 +32,6 @@ void Transform_calculator::setupTransformationMatrix(){
             nh->getParam("T_cam_body/r"+std::to_string(r)+"/c"+std::to_string(c), T_CtoB(r,c));
         }
     }
-
-
 
   // TODO: Check this part with Vicon later  
   bool init_world_with_vicon = false;
@@ -77,8 +74,10 @@ void Transform_calculator::setupTransformationMatrix(){
 
 void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_in) {
   nav_msgs::Odometry odomIinM = *msg_in;
-  double current_timestamp = ros::Time::now().toSec();
-  if ((current_timestamp - last_timestamp) <=  pub_frequency){
+  current_timestamp = std::chrono::high_resolution_clock::now();
+  if (std::chrono::duration_cast<std::chrono::duration<double>>(current_timestamp - last_timestamp).count() <= pub_frequency) {
+  //current_timestamp = ros::Time::now().toSec();
+  // if ((current_timestamp - last_timestamp) <=  pub_frequency){
 	  return;
   }
   last_timestamp = current_timestamp;
@@ -96,7 +95,6 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     T_init_tf_inv.block(0,0,3,3) = T_init_tf.block(0,0,3,3).transpose();
     T_init_tf_inv.block(0,3,3,1) = -T_init_tf.block(0,0,3,3).transpose()*T_init_tf.block(0,3,3,1);
     T_MtoW = T_MtoW*T_init_tf;
-    //T_MtoW = T_init_tf*T_MtoW;
     std::cout << T_MtoW << std::endl;
     got_init_tf = true;
   }
@@ -137,8 +135,6 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
 
     T_BtoW = T_B0toW * T_BtoB0;
 
-    // ROS_INFO("<<<T_BinW");
-    // print_tf(T_BtoW);
     Eigen::Quaterniond  q_BinW;
     Eigen::Matrix3d R_BtoW =  T_BtoW.block(0,0,3,3);
     q_BinW = R_BtoW;
