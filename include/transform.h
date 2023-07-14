@@ -22,7 +22,7 @@ class Transform_calculator {
 
 		
         std::shared_ptr<ros::NodeHandle> nh;
-		ros::Subscriber sub_odomimu;
+	ros::Subscriber sub_odomimu;
         ros::Publisher pub_odomworldB0;
         ros::Publisher pub_odomworld;
     
@@ -42,8 +42,8 @@ class Transform_calculator {
 
         int skip_count = 0;
 
-        float pub_frequency = 0.0;
-	//double last_timestamp = -1;
+        double pub_frequency = 0.0;
+	double last_timestamp = -1;
         float imu_rate = 0;
         float odom_rate = 0;
 		
