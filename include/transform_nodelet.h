@@ -6,15 +6,15 @@
 
 namespace transform_nodelet_ns
 {
-class OvtransformNodeletClass : public nodelet::Nodelet
-{
-public:
-    OvtransformNodeletClass();
-    ~OvtransformNodeletClass();
-    virtual void onInit();
-private:
-    std::string config_path;
-};
+    class OvtransformNodeletClass : public nodelet::Nodelet
+    {
+        public:
+            OvtransformNodeletClass();
+            ~OvtransformNodeletClass();
+            virtual void onInit();
+        private:
+            std::string config_path;
+    };
 } // namespace transform_nodelet_ns
 
 #endif /* ovmsckf_nodelet_CLASS_SRC_ovmsckf_nodelet_CLASS_H_ */
