@@ -4,10 +4,8 @@
 #include <ros/ros.h>
 #include <iostream>
 #include <nav_msgs/Odometry.h>
-#include <ros/ros.h>
 #include <chrono>
 #include <Eigen/Eigen>
-#include <chrono>
 
 namespace odom_transform{
 
