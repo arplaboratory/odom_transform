@@ -1,6 +1,7 @@
 imu_rate: 200.0
 odom_rate: 150.0
-
+init_world_with_vicon: true
+viconOdomWTopic: "/$(optenv MAV_NAME quadrotor)/odom"
 
 T_cam_imu:
   r0: {c0: 1.0, c1: 0.0, c2: 0.0, c3: -0.04402011600452833}
@@ -12,3 +13,8 @@ T_cam_body:
   r1: {c0: -1.0, c1: 0.0, c2: -0.0, c3: -0.03820127}
   r2: {c0: 0.0, c1: -1.0, c2: 0.0, c3: -0.04474833}
   
+# the rotation and position of the initial position of robot B0 frame w.r.t world frame
+T_B0_W:
+  r0: {c0: 1.0, c1: 0.0, c2: 0.0, c3: 0.0}
+  r1: {c0: 0.0, c1: 1.0, c2: 0.0, c3: 0.0}
+  r2: {c0: 0.0, c1: 0.0, c2: 1.0, c3: 0.0}

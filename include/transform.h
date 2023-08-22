@@ -21,6 +21,8 @@ namespace odom_transform{
             void setupTransformationMatrix();
             Eigen::Matrix<double, 7, 1> print_tf(Eigen::Matrix4d T);
 
+            Eigen::Matrix4d T_ItoC = Eigen::Matrix4d::Identity();
+            Eigen::Matrix4d T_CtoB = Eigen::Matrix4d::Identity();
             // Transformation between vio local (IMU) frame to vicon world frame
             Eigen::Matrix4d T_MtoW = Eigen::Matrix4d::Identity();
             Eigen::Matrix4d T_ItoB = Eigen::Matrix4d::Identity();
@@ -30,15 +32,32 @@ namespace odom_transform{
             Eigen::Matrix4d T_MtoB0 = Eigen::Matrix4d::Identity();
             Eigen::Matrix4d T_init_tf = Eigen::Matrix4d::Identity();
             Eigen::Matrix4d T_init_tf_inv = Eigen::Matrix4d::Identity();
-            Eigen::Matrix3d hat_M2B0;
-            Eigen::Matrix<double, 7, 1> T_MtoW_eigen;
+            Eigen::Matrix4d T_ItoM = Eigen::Matrix4d::Identity(); // from odomIinM
+            // Eigen::Matrix4d T_ItoB0 = Eigen::Matrix4d::Identity(); // from odomIinM
+            // Eigen::Matrix4d T_ItoW = Eigen::Matrix4d::Identity(); // from odomIinM
+            Eigen::Matrix4d T_BtoB0 = Eigen::Matrix4d::Identity();
+            Eigen::Matrix4d T_BtoW = Eigen::Matrix4d::Identity();
+            Eigen::Matrix3d R_BtoB0 = Eigen::Matrix3d::Identity();
+            Eigen::Matrix3d R_BtoW = Eigen::Matrix3d::Identity();
+            Eigen::Matrix3d skew_ItoB = Eigen::Matrix3d::Zero();
 
+            Eigen::Matrix<double, 7, 1> T_MtoW_eigen;
+            Eigen::Matrix<double, 4,1> q_GinI_eigen;
+
+            Eigen::Vector4d position_BinW = Eigen::Vector4d::Zero();
+            Eigen::Vector4d position_BinB0 = Eigen::Vector4d::Zero();
+            Eigen::Vector3d v_iinIMU = Eigen::Vector3d::Zero();
+            Eigen::Vector3d w_BinB = Eigen::Vector3d::Zero();
+            Eigen::Vector3d w_iinIMU = Eigen::Vector3d::Zero();
+            Eigen::Vector3d v_BinB = Eigen::Vector3d::Zero();
             std::shared_ptr<ros::NodeHandle> nh;
             ros::Subscriber sub_odomimu;
             ros::Publisher pub_odomworldB0;
             ros::Publisher pub_odomworld;
-
-            bool got_init_tf=false;
+            nav_msgs::OdometryPtr odomBinW;
+            nav_msgs::OdometryPtr odomBinB0;
+            bool got_init_tf = false;
+            bool init_world_with_vicon = false;
             int skip_count = 0;
 
             double pub_frequency = 0.0;
