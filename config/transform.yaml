@@ -1,6 +1,6 @@
 imu_rate: 200.0
 odom_rate: 150.0
-init_world_with_vicon: true
+init_world_with_vicon: false
 viconOdomWTopic: "/$(optenv MAV_NAME quadrotor)/odom"
 
 T_cam_imu:

@@ -35,7 +35,6 @@ void Transform_calculator::setupTransformationMatrix(){
     nh->getParam("init_world_with_vicon", init_world_with_vicon);
 
     // TODO: Check this part with Vicon later  
-    bool init_world_with_vicon = false;
     if (init_world_with_vicon) {
         std::string viconOdomWTopic;
         nh->getParam("viconOdomWTopic", viconOdomWTopic);
