@@ -12,8 +12,6 @@ namespace transform_nodelet_ns
             OvtransformNodeletClass();
             ~OvtransformNodeletClass();
             virtual void onInit();
-        private:
-            std::string config_path;
     };
 } // namespace transform_nodelet_ns
 
