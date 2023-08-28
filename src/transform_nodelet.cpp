@@ -12,9 +12,6 @@ namespace transform_nodelet_ns
     void OvtransformNodeletClass::onInit()
     {
         std::shared_ptr<ros::NodeHandle> nh = std::make_shared<ros::NodeHandle>(getMTPrivateNodeHandle());
-        if( !nh->getParam("odom_transform_config_path", config_path) )
-            ROS_ERROR("Failed to get param config_path from server.");
-        ROS_INFO("Odom Transform Config path: %s", config_path.c_str());
         auto trans_cal= new Transform_calculator(nh);
         trans_cal->setup();
     }
