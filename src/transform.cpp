@@ -53,18 +53,18 @@ void Transform_calculator::setupTransformationMatrix(){
             initBodyQuatinW.z() = initBodyOdominW.pose.pose.orientation.z;
             T_B0toW.block(0, 0, 3, 3) = initBodyQuatinW.toRotationMatrix();
             T_B0toW.block(0, 3, 3, 1) = initBodyPosinW;
-            T_WtoB0.block(0, 0, 3, 3) = initBodyQuatinW.toRotationMatrix().transpose();
-            T_WtoB0.block(0, 3, 3, 1) = -initBodyQuatinW.toRotationMatrix().transpose() * initBodyPosinW;
-            T_MtoB0 = T_WtoB0 * T_MtoW;
+            T_WtoB0.block(0, 0, 3, 3).noalias() = initBodyQuatinW.toRotationMatrix().transpose();
+            T_WtoB0.block(0, 3, 3, 1).noalias() = -initBodyQuatinW.toRotationMatrix().transpose() * initBodyPosinW;
+            T_MtoB0.noalias() = T_WtoB0 * T_MtoW;
         }
         else {
             ROS_INFO("Failed to get init T_BtoW from vicon topic %s, use default T_BtoW by setting init_world_with_vicon false\n", viconOdomWTopic.c_str());
         }
     } 
-    T_ItoB = T_CtoB * T_ItoC; //* T_correct ;
-    T_BtoI.block(0,0,3,3) = T_ItoB.block(0,0,3,3).transpose();
-    T_BtoI.block(0,3,3,1) = -T_ItoB.block(0,0,3,3).transpose() * T_ItoB.block(0,3,3,1);
-    T_MtoW = T_B0toW * T_ItoB; // T_ItoW at zero timestamp
+    T_ItoB.noalias() = T_CtoB * T_ItoC; //* T_correct ;
+    T_BtoI.block(0,0,3,3).noalias() = T_ItoB.block(0,0,3,3).transpose();
+    T_BtoI.block(0,3,3,1).noalias() = -T_ItoB.block(0,0,3,3).transpose() * T_ItoB.block(0,3,3,1);
+    T_MtoW.noalias() = T_B0toW * T_ItoB; // T_ItoW at zero timestamp
 }
 
 
@@ -77,7 +77,6 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     last_timestamp = current_timestamp;
     nav_msgs::Odometry odomIinM = *msg_in;
     if (!got_init_tf){
-
         T_init_tf(0, 3) = odomIinM.pose.pose.position.x;
         T_init_tf(1, 3) = odomIinM.pose.pose.position.y;
         T_init_tf(2, 3) = odomIinM.pose.pose.position.z;
@@ -106,7 +105,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
 
     q_GinI_eigen << odomIinM.pose.pose.orientation.x, odomIinM.pose.pose.orientation.y, odomIinM.pose.pose.orientation.z, odomIinM.pose.pose.orientation.w;;
 
-    T_ItoM.block(0,0,3,3) = quat_2_Rot(q_GinI_eigen).transpose(); // this is right-handed JPL->right-handed
+    T_ItoM.block(0,0,3,3).noalias() = quat_2_Rot(q_GinI_eigen).transpose(); // this is right-handed JPL->right-handed
 
     T_ItoM(0, 3) = odomIinM.pose.pose.position.x;
     T_ItoM(1, 3) = odomIinM.pose.pose.position.y;
@@ -116,10 +115,10 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     //T_ItoW = T_MtoW * T_ItoM;
 
     T_ItoM = T_init_tf_inv * T_ItoM;
-    T_BtoB0 = T_ItoB * T_ItoM * T_BtoI;
+    T_BtoB0.noalias() = T_ItoB * T_ItoM * T_BtoI;
 
     // Transform the body pose in World frame
-    T_BtoW = T_B0toW * T_BtoB0;
+    T_BtoW.noalias() = T_B0toW * T_BtoB0;
 
     R_BtoB0 = T_BtoB0.block(0,0,3,3);
     R_BtoW = T_BtoW.block(0,0,3,3);
@@ -129,70 +128,61 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     position_BinW = Eigen::Vector4d(T_BtoW(0,3), T_BtoW(1,3), T_BtoW(2,3), T_BtoW(3,3));
     position_BinB0 = Eigen::Vector4d(T_BtoB0(0,3), T_BtoB0(1,3), T_BtoB0(2,3), T_BtoB0(3,3));
     skew_ItoB << 0,-T_ItoB(2,3), T_ItoB(1,3), T_ItoB(2,3), 0, -T_ItoB(0,3), -T_ItoB(1,3),T_ItoB(0,3), 0;
-    v_iinIMU = Eigen::Vector3d(odomIinM.twist.twist.linear.x, odomIinM.twist.twist.linear.y, odomIinM.twist.twist.linear.z);
-    w_BinB = Eigen::Vector3d(odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y, odomIinM.twist.twist.angular.z);
-    w_iinIMU = Eigen::Vector3d(odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y, odomIinM.twist.twist.angular.z);
-    v_BinB = - T_ItoB.block(0,0,3,3) *skew_ItoB * w_iinIMU + T_ItoB.block(0,0,3,3) * v_iinIMU ;
-    Eigen::Quaterniond T_BinB0_from_q;
-    Eigen::Quaterniond T_BinW_from_q;
-    T_BinB0_from_q.x() = q_BinB0.x();
-    T_BinB0_from_q.y() = q_BinB0.y();
-    T_BinB0_from_q.z() = q_BinB0.z();
-    T_BinB0_from_q.w() = q_BinB0.w();
-    T_BinW_from_q.x() = q_BinW.x();
-    T_BinW_from_q.y() = q_BinW.y();
-    T_BinW_from_q.z() = q_BinW.z();
-    T_BinW_from_q.w() = q_BinW.w();
+    v_iinIMU.noalias() = Eigen::Vector3d(odomIinM.twist.twist.linear.x, odomIinM.twist.twist.linear.y, odomIinM.twist.twist.linear.z);
+    w_BinB.noalias() = Eigen::Vector3d(odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y, odomIinM.twist.twist.angular.z);
+    w_iinIMU.noalias() = Eigen::Vector3d(odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y, odomIinM.twist.twist.angular.z);
+    v_BinB.noalias() = - T_ItoB.block(0,0,3,3) *skew_ItoB * w_iinIMU + T_ItoB.block(0,0,3,3) * v_iinIMU ;
 
-    Eigen::Vector3d v_BinB0 = R_BtoB0 * v_BinB ;
-    Eigen::Vector3d v_BinW = R_BtoW * v_BinB ;
+    v_BinB0.noalias() = R_BtoB0 * v_BinB ;
+    v_BinW.noalias() = R_BtoW * v_BinB ;
 
-    // The POSE component (orientation and position)
-    odomBinW->pose.pose.orientation.x = q_BinW.x();
-    odomBinW->pose.pose.orientation.y = q_BinW.y();  
-    odomBinW->pose.pose.orientation.z = q_BinW.z();
-    odomBinW->pose.pose.orientation.w = q_BinW.w();
-    odomBinW->pose.pose.position.x = position_BinW(0); 
-    odomBinW->pose.pose.position.y = position_BinW(1); 
-    odomBinW->pose.pose.position.z = position_BinW(2);
+    if (pub_odomworld.getNumSubscribers() != 0) {
+        odomBinW->pose.pose.orientation.x = q_BinW.x();
+        odomBinW->pose.pose.orientation.y = q_BinW.y();
+        odomBinW->pose.pose.orientation.z = q_BinW.z();
+        odomBinW->pose.pose.orientation.w = q_BinW.w();
+        odomBinW->pose.pose.position.x = position_BinW(0);
+        odomBinW->pose.pose.position.y = position_BinW(1);
+        odomBinW->pose.pose.position.z = position_BinW(2);
 
-    odomBinB0->pose.pose.orientation.x = q_BinB0.x();
-    odomBinB0->pose.pose.orientation.y = q_BinB0.y();
-    odomBinB0->pose.pose.orientation.z = q_BinB0.z();
-    odomBinB0->pose.pose.orientation.w = q_BinB0.w();
-    odomBinB0->pose.pose.position.x = position_BinB0(0); 
-    odomBinB0->pose.pose.position.y = position_BinB0(1); 
-    odomBinB0->pose.pose.position.z = position_BinB0(2);
+        odomBinW->child_frame_id = "body";
+        odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
+        odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
+        odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
+        odomBinW->twist.twist.angular.x = w_BinB(0); // we do not estimate this...
+        odomBinW->twist.twist.angular.y = w_BinB(1); // we do not estimate this...
+        odomBinW->twist.twist.angular.z = w_BinB(2);; // we do not estimate this...
+        odomBinW->pose.covariance = odomIinM.pose.covariance;
 
-    // The TWIST component (angular and linear velocities)
-    odomBinW->child_frame_id = "body";
-    odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
-    odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
-    odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
-    odomBinW->twist.twist.angular.x = w_BinB(0); // we do not estimate this...
-    odomBinW->twist.twist.angular.y = w_BinB(1); // we do not estimate this...
-    odomBinW->twist.twist.angular.z = w_BinB(2);; // we do not estimate this...
+        pub_odomworld.publish(odomBinW);
+        // if ( odomBinW.pose.covariance(0) > 0.05){
+        //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n",  odomBinW.pose.covariance(0));
+        // }
+        // if ( odomBinW.pose.covariance(7) > 0.05){
+        //   PRINT_ERROR(RED "Drift detected: pose covariance of y-y is too high %.6f\n",  odomBinW.pose.covariance(7));
+        // }
+        // if ( odomBinW.pose.covariance(14) > 0.05){
+        //   PRINT_ERROR(RED "Drift detected: pose covariance of z-z is too high %.6f\n",  odomBinW.pose.covariance(14));
+        // }
+    }
+    if (pub_odomworldB0.getNumSubscribers() != 0) {
+        odomBinB0->pose.pose.orientation.x = q_BinB0.x();
+        odomBinB0->pose.pose.orientation.y = q_BinB0.y();
+        odomBinB0->pose.pose.orientation.z = q_BinB0.z();
+        odomBinB0->pose.pose.orientation.w = q_BinB0.w();
+        odomBinB0->pose.pose.position.x = position_BinB0(0);
+        odomBinB0->pose.pose.position.y = position_BinB0(1);
+        odomBinB0->pose.pose.position.z = position_BinB0(2);
 
-    odomBinB0->child_frame_id = "body";
-    odomBinB0->twist.twist.linear.x = v_BinB0(0);   // vel in world frame
-    odomBinB0->twist.twist.linear.y = v_BinB0(1);   // vel in world frame
-    odomBinB0->twist.twist.linear.z = v_BinB0(2);   // vel in world frame
-    odomBinB0->twist.twist.angular.x = w_BinB(0); // we do not estimate this...
-    odomBinB0->twist.twist.angular.y = w_BinB(1); // we do not estimate this...
-    odomBinB0->twist.twist.angular.z = w_BinB(2); // we do not estimate this...
+        odomBinB0->child_frame_id = "body";
+        odomBinB0->twist.twist.linear.x = v_BinB0(0);   // vel in world frame
+        odomBinB0->twist.twist.linear.y = v_BinB0(1);   // vel in world frame
+        odomBinB0->twist.twist.linear.z = v_BinB0(2);   // vel in world frame
+        odomBinB0->twist.twist.angular.x = w_BinB(0); // we do not estimate this...
+        odomBinB0->twist.twist.angular.y = w_BinB(1); // we do not estimate this...
+        odomBinB0->twist.twist.angular.z = w_BinB(2); // we do not estimate this...
+        odomBinB0->pose.covariance = odomIinM.pose.covariance;
 
-    odomBinW->pose.covariance = odomIinM.pose.covariance;
-    odomBinB0->pose.covariance = odomIinM.pose.covariance;
-    // if ( odomBinW.pose.covariance(0) > 0.05){
-    //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n",  odomBinW.pose.covariance(0));
-    // }
-    // if ( odomBinW.pose.covariance(7) > 0.05){
-    //   PRINT_ERROR(RED "Drift detected: pose covariance of y-y is too high %.6f\n",  odomBinW.pose.covariance(7));
-    // }
-    // if ( odomBinW.pose.covariance(14) > 0.05){
-    //   PRINT_ERROR(RED "Drift detected: pose covariance of z-z is too high %.6f\n",  odomBinW.pose.covariance(14));
-    // }
-
-    pub_odomworld.publish(odomBinW);
-    pub_odomworldB0.publish(odomBinB0);
+        pub_odomworldB0.publish(odomBinB0);
+    }
 }

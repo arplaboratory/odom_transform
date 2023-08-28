@@ -44,6 +44,8 @@ namespace odom_transform{
 
             Eigen::Vector4d position_BinW = Eigen::Vector4d::Zero();
             Eigen::Vector4d position_BinB0 = Eigen::Vector4d::Zero();
+            Eigen::Vector3d v_BinB0 = Eigen::Vector3d::Zero();
+            Eigen::Vector3d v_BinW = Eigen::Vector3d::Zero();
             Eigen::Vector3d v_iinIMU = Eigen::Vector3d::Zero();
             Eigen::Vector3d w_BinB = Eigen::Vector3d::Zero();
             Eigen::Vector3d w_iinIMU = Eigen::Vector3d::Zero();
