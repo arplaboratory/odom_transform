@@ -22,13 +22,15 @@ void Transform_calculator::setup() {
         ROS_ERROR("[odom_transform] No odom_rate configured!");
     }
     if (nh->getParam("mav_name", mav_name)) {
-        ROS_INFO("[odom_transform] mav_name: %f", mav_name);
+        ROS_INFO("[odom_transform] mav_name: %s", mav_name.c_str());
     } else {
         ROS_ERROR("[odom_transform] No mav_name configured!");
     }
     pub_frequency = 1.0/odom_rate;
     setupTransformationMatrix();
-
+    // nh->getParam("publish_tf", publish_tf, false);
+    // trans_BinB0.frame_id = mav_name + "/odom";
+    // trans_BinW.frame_id = "world";
 }
 
 void Transform_calculator::setupTransformationMatrix(){
@@ -156,7 +158,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinW->pose.pose.position.y = position_BinW(1);
         odomBinW->pose.pose.position.z = position_BinW(2);
 
-        odomBinW->child_frame_id = mav_name+"/body";
+        odomBinW->child_frame_id = mav_name + "/body";
         odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
         odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
         odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
@@ -185,7 +187,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinB0->pose.pose.position.y = position_BinB0(1);
         odomBinB0->pose.pose.position.z = position_BinB0(2);
 
-        odomBinB0->child_frame_id = mav_name+"body";
+        odomBinB0->child_frame_id = mav_name + "/body";
         odomBinB0->twist.twist.linear.x = v_BinB0(0);   // vel in world frame
         odomBinB0->twist.twist.linear.y = v_BinB0(1);   // vel in world frame
         odomBinB0->twist.twist.linear.z = v_BinB0(2);   // vel in world frame
