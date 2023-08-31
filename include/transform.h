@@ -65,6 +65,7 @@ namespace odom_transform{
             std::chrono::high_resolution_clock::time_point current_timestamp{};
             float imu_rate = 0;
             float odom_rate = 0;
+            std::string mav_name;
 
     };
 
