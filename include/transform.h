@@ -55,13 +55,12 @@ namespace odom_transform{
             ros::Subscriber sub_odomimu;
             ros::Publisher pub_odomworldB0;
             ros::Publisher pub_odomworld;
-	    tf::TransformBroadcaster mTfBr;
-	    tf::StampedTransform trans_BinB0;
-	    tf::StampedTransform trans_BinW;
+            tf::TransformBroadcaster mTfBr;
             nav_msgs::OdometryPtr odomBinW;
             nav_msgs::OdometryPtr odomBinB0;
             bool got_init_tf = false;
             bool init_world_with_vicon = false;
+            bool publish_tf = true;
             int skip_count = 0;
 
             double pub_frequency = 0.0;
@@ -72,6 +71,18 @@ namespace odom_transform{
             std::string mav_name;
 
     };
+
+    inline tf::StampedTransform get_stamped_transform_from_odom(const nav_msgs::Odometry::ConstPtr & odom) {
+            auto q_ItoC = odom->pose.pose.orientation;
+            auto p_CinI = odom->pose.pose.position;
+            tf::StampedTransform trans;
+            trans.stamp_ = odom->header.stamp;
+            tf::Quaternion quat(q_ItoC.x, q_ItoC.y, q_ItoC.z, q_ItoC.w);
+            trans.setRotation(quat);
+            tf::Vector3 orig(p_CinI.x, p_CinI.y, p_CinI.z);
+            trans.setOrigin(orig);
+            return trans;
+    }
 
     inline Eigen::Matrix<double, 3, 3> skew_x(const Eigen::Matrix<double, 3, 1> &w) {
         Eigen::Matrix<double, 3, 3> w_x;

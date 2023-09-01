@@ -28,9 +28,12 @@ void Transform_calculator::setup() {
     }
     pub_frequency = 1.0/odom_rate;
     setupTransformationMatrix();
-    // nh->getParam("publish_tf", publish_tf, false);
-    // trans_BinB0.frame_id = mav_name + "/odom";
-    // trans_BinW.frame_id = "world";
+    if (nh->getParam("publish_tf", publish_tf)) {
+        ROS_INFO("[odom_transform] publish_tf: %d", publish_tf);
+    } else {
+        ROS_INFO("[odom_transform] publish_tf: false");
+        publish_tf = false;
+    }
 }
 
 void Transform_calculator::setupTransformationMatrix(){
@@ -168,6 +171,12 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinW->pose.covariance = odomIinM.pose.covariance;
 
         pub_odomworld.publish(odomBinW);
+        if (publish_tf) {
+            tf::StampedTransform trans = get_stamped_transform_from_odom(odomBinW);
+            trans.frame_id_ = "world";
+            trans.child_frame_id_ = mav_name + "/body";
+            mTfBr.sendTransform(trans);
+        }
         // if ( odomBinW.pose.covariance(0) > 0.05){
         //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n",  odomBinW.pose.covariance(0));
         // }
@@ -197,5 +206,11 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinB0->pose.covariance = odomIinM.pose.covariance;
 
         pub_odomworldB0.publish(odomBinB0);
+        if (publish_tf) {
+            tf::StampedTransform trans = get_stamped_transform_from_odom(odomBinB0);
+            trans.frame_id_ = mav_name + "/odom";
+            trans.child_frame_id_ = mav_name + "/body";
+            mTfBr.sendTransform(trans);
+        }
     }
 }
