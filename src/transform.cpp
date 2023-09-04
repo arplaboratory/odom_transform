@@ -11,13 +11,29 @@ void Transform_calculator::setup() {
     pub_odomworld = nh->advertise<nav_msgs::Odometry>("odomBinworld_from_transform", 1);
     ROS_INFO("[odom_transform] Publishing: %s", pub_odomworldB0.getTopic().c_str());
     ROS_INFO("[odom_transform] Publishing: %s", pub_odomworld.getTopic().c_str());
-    nh->getParam("imu_rate", imu_rate);
-    nh->getParam("odom_rate", odom_rate);
-    ROS_INFO("[odom_transform] imu_rate: %f",imu_rate);
-    ROS_INFO("[odom_transform] odom_rate: %f", odom_rate);
+    if (nh->getParam("imu_rate", imu_rate)) {
+        ROS_INFO("[odom_transform] imu_rate: %f",imu_rate);
+    } else {
+        ROS_ERROR("[odom_transform] No imu_rate configured!");
+    }
+    if (nh->getParam("odom_rate", odom_rate)) {
+        ROS_INFO("[odom_transform] odom_rate: %f", odom_rate);
+    } else {
+        ROS_ERROR("[odom_transform] No odom_rate configured!");
+    }
+    if (nh->getParam("mav_name", mav_name)) {
+        ROS_INFO("[odom_transform] mav_name: %s", mav_name.c_str());
+    } else {
+        ROS_ERROR("[odom_transform] No mav_name configured!");
+    }
     pub_frequency = 1.0/odom_rate;
     setupTransformationMatrix();
-
+    if (nh->getParam("publish_tf", publish_tf)) {
+        ROS_INFO("[odom_transform] publish_tf: %d", publish_tf);
+    } else {
+        ROS_INFO("[odom_transform] publish_tf: false");
+        publish_tf = false;
+    }
 }
 
 void Transform_calculator::setupTransformationMatrix(){
@@ -98,7 +114,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
     }
     if (!odomBinB0) {
         odomBinB0 = boost::make_shared<nav_msgs::Odometry>();
-        odomBinB0->header.frame_id = "odom";
+        odomBinB0->header.frame_id = mav_name+"/odom";
     }
     odomBinW->header.stamp = odomIinM.header.stamp;
     odomBinB0->header.stamp = odomIinM.header.stamp;
@@ -145,7 +161,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinW->pose.pose.position.y = position_BinW(1);
         odomBinW->pose.pose.position.z = position_BinW(2);
 
-        odomBinW->child_frame_id = "body";
+        odomBinW->child_frame_id = mav_name + "/body";
         odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
         odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
         odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
@@ -155,6 +171,14 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinW->pose.covariance = odomIinM.pose.covariance;
 
         pub_odomworld.publish(odomBinW);
+	/*
+        if (publish_tf) {
+            tf::StampedTransform trans = get_stamped_transform_from_odom(odomBinW);
+            trans.frame_id_ = "world";
+            trans.child_frame_id_ = mav_name + "/body";
+            mTfBr.sendTransform(trans);
+        }
+	*/
         // if ( odomBinW.pose.covariance(0) > 0.05){
         //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n",  odomBinW.pose.covariance(0));
         // }
@@ -174,7 +198,7 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinB0->pose.pose.position.y = position_BinB0(1);
         odomBinB0->pose.pose.position.z = position_BinB0(2);
 
-        odomBinB0->child_frame_id = "body";
+        odomBinB0->child_frame_id = mav_name + "/body";
         odomBinB0->twist.twist.linear.x = v_BinB0(0);   // vel in world frame
         odomBinB0->twist.twist.linear.y = v_BinB0(1);   // vel in world frame
         odomBinB0->twist.twist.linear.z = v_BinB0(2);   // vel in world frame
@@ -184,5 +208,11 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinB0->pose.covariance = odomIinM.pose.covariance;
 
         pub_odomworldB0.publish(odomBinB0);
+        if (publish_tf) {
+            tf::StampedTransform trans = get_stamped_transform_from_odom(odomBinB0);
+            trans.frame_id_ = mav_name + "/odom";
+            trans.child_frame_id_ = mav_name + "/body";
+            mTfBr.sendTransform(trans);
+        }
     }
 }
