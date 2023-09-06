@@ -1,0 +1,32 @@
+name: clang-format
+on: [pull_request]
+
+jobs:
+  clang-format:
+    if: startsWith(github.head_ref, 'clang-format-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: clang-format
+        id: clang-format
+        uses: DoozyX/clang-format-lint-action@v0.14
+        with:
+          source: './src/'
+          # exclude: './src/peanut_ros/hardware/peanut_arduino'
+          extensions: 'h,cpp,c,hpp'
+          clangFormatVersion: 14
+          inplace: True
+      - name: Set clang-format branch name
+        id: vars
+        run: echo ::set-output name=branch-name::"clang-format-patches/${{ github.head_ref }}"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: clang-format action fixes
+          title: Fixes by clang-format action
+          body: This is an auto-generated PR with fixes by clang-format.
+          labels: clang-format, automated pr
+          reviewers: peter-evans
+          branch: ${{ steps.vars.outputs.branch-name }}
