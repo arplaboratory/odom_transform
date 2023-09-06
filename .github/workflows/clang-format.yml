@@ -13,7 +13,7 @@ jobs:
         id: clang-format
         uses: DoozyX/clang-format-lint-action@v0.14
         with:
-          source: './src/'
+          source: './src'
           # exclude: './src/peanut_ros/hardware/peanut_arduino'
           extensions: 'h,cpp,c,hpp'
           clangFormatVersion: 14
