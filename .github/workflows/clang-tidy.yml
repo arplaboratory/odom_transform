@@ -1,0 +1,32 @@
+name: Run Clang-Tidy
+on: [pull_request]
+
+
+jobs:
+  clang-tidy:
+    name: Run Clang-Tidy and Create PR
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Clang and clang-tidy
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang
+        sudo apt-get install -y clang-tidy
+      shell: bash
+
+    - name: Run Clang-Tidy and create PR
+      run: |
+        clang-tidy --version
+        clang-tidy -fix /src/**/*.cpp -- -std=c++11
+        git diff --exit-code || {
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git commit -am "Fix clang-tidy suggestions"
+          git push
+          hub pull-request -m "Apply clang-tidy fixes" -b main
+        }
+      working-directory: ${{ github.workspace }}
