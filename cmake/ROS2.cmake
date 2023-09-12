@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(odom_transform_ros2)
+project(odom_transform)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)

@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>odom_transform_ros2</name>
+  <name>odom_transform</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="yashsshetye@gmail.com">yash</maintainer>
+  <maintainer email="yangzhou@nyu.edu">Yang Zhou</maintainer>
+  <maintainer email="ys5153@nyu.edu">Yash Shetye</maintainer>
+  <maintainer email="jx1190@nyu.edu">Jiuhong Xiao</maintainer>
   <license>TODO: License declaration</license>
 
   <!-- ROS1: Dependencies needed to compile this package. -->

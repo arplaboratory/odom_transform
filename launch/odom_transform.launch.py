@@ -4,7 +4,7 @@ import os
 from ament_index_python.packages import get_package_share_directory, get_package_prefix
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, LogInfo, OpaqueFunction, SetEnvironmentVariable, ExecuteProcess
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, TextSubstitution, EnvironmentVariable
 from launch_ros.actions import LoadComposableNodes, Node
 from launch_ros.actions import ComposableNodeContainer
@@ -16,9 +16,15 @@ def generate_launch_description():
         DeclareLaunchArgument(name="namespace", default_value="race1", description="namespace"),
     ]
 
-    #transform_config_path = os.path.join(
-    #    get_package_share_directory('odom_transform_ros2'),
-    #    'config', 'transform.yaml')
+    SetEnvironmentVariable(
+    	name="MAV_NAME",
+    	value="quadrotor",
+    )
+    
+    # Path to config file for the odom transform node
+    transform_config_path = os.path.join(
+        get_package_share_directory('odom_transform'),
+        'config', 'transform.yaml')
     
     # Loading the odom transform composable node
     odom_transform_node = ComposableNode(
@@ -26,7 +32,8 @@ def generate_launch_description():
         package='odom_transform_ros2',
         plugin='transform_nodelet_ns::OvtransformNodeletClass',
         name='odom_transform_node',
-        parameters=[{'transform_config_path' : '/home/yash/ros2_ws/src/odom_transform_ros2/config/transform.yaml'}],
+        parameters=[{'transform_config_path' : transform_config_path},
+                    {'mav_name': EnvironmentVariable("MAV_NAME")}],
         #remappings = [('~/odomimu', '/race1/odom_transform_nodelet/odomimu')]
     )
 

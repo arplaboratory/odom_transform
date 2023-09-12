@@ -21,7 +21,7 @@ OvtransformNodeletClass::~OvtransformNodeletClass()
 void OvtransformNodeletClass::onInit()
 {
     // Declaring the yaml file parameter
-    this->declare_parameter("transform_config_path", transform_config_path);
+    transform_config_path = this->declare_parameter("transform_config_path", std::string("Initial Value"));
     if (!this->get_parameter("transform_config_path", transform_config_path)) {
         RCLCPP_ERROR(this->get_logger(), "Failed to get param config_path from server.");
     } else {
@@ -35,7 +35,7 @@ void OvtransformNodeletClass::onInit()
 // Defining setup function 
 void OvtransformNodeletClass::setup(const std::string transform_config_path) {
 
-    // Creating subscriber
+    // Creating subscriberthis->get_parameter
     sub_odomimu = this->create_subscription<nav_msgs::msg::Odometry>("odomimu", 1, std::bind(&OvtransformNodeletClass::odomCallback, this, std::placeholders::_1));
     
     // Creating publishers
@@ -98,7 +98,11 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
 
     // TODO: Check this part with Vicon later
     if (init_world_with_vicon) {
-        std::string viconOdomWTopic = config["viconOdomWTopic"].as<std::string>();
+        std::string mav_name;
+        mav_name = this->declare_parameter("mav_name", std::string("Value"));
+        this->get_parameter("mav_name", mav_name);
+        std::string viconOdomWTopic1 = config["viconOdomWTopic_ros2"].as<std::string>();
+        std::string viconOdomWTopic  = "/" + mav_name + viconOdomWTopic1;
         auto sharedInitBodyOdominW = std::make_shared<nav_msgs::msg::Odometry>();
         nav_msgs::msg::Odometry initBodyOdominW;
 

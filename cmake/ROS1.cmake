@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(odom_transform_ros2)
+project(odom_transform)
 
 find_package(catkin QUIET COMPONENTS roscpp roslib sensor_msgs)
 find_package(Eigen3 REQUIRED)
