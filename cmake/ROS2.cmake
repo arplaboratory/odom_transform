@@ -21,7 +21,6 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(cv_bridge REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -60,7 +59,7 @@ install(TARGETS
     RUNTIME DESTINATION bin
 )
 
-install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY config/ DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/launch/)
+install(DIRECTORY config/ DESTINATION share/${PROJECT_NAME}/config/)
 
 ament_package()

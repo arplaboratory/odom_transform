@@ -4,6 +4,8 @@
   <name>odom_transform</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
+  <author email="cw4030@nyu.edu">Chenyu</author>
+  <maintainer email="cw4030@nyu.edu">Chenyu</maintainer>
   <maintainer email="yangzhou@nyu.edu">Yang Zhou</maintainer>
   <maintainer email="ys5153@nyu.edu">Yash Shetye</maintainer>
   <maintainer email="jx1190@nyu.edu">Jiuhong Xiao</maintainer>
@@ -19,7 +21,6 @@
   <depend condition="$ROS_VERSION == 1">std_msgs</depend>
   <depend condition="$ROS_VERSION == 1">sensor_msgs</depend>
   <depend condition="$ROS_VERSION == 1">nav_msgs</depend>
-  <depend condition="$ROS_VERSION == 1">cv_bridge</depend>
 
   <!-- ROS2: Dependencies needed to compile this package. -->
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
@@ -27,7 +28,6 @@
   <depend condition="$ROS_VERSION == 2">std_msgs</depend>
   <depend condition="$ROS_VERSION == 2">sensor_msgs</depend>
   <depend condition="$ROS_VERSION == 2">nav_msgs</depend>
-  <depend condition="$ROS_VERSION == 2">cv_bridge</depend>
   <depend condition="$ROS_VERSION == 2">rclcpp_components</depend>
 
   <!-- System dependencies for both versions -->

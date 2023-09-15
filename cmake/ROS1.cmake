@@ -3,10 +3,6 @@ project(odom_transform)
 
 find_package(catkin QUIET COMPONENTS roscpp roslib sensor_msgs)
 find_package(Eigen3 REQUIRED)
-find_package(OpenCV 3 QUIET)
-if (NOT OpenCV_FOUND)
-    find_package(OpenCV 4 REQUIRED)
-endif ()
 
 find_package(catkin QUIET COMPONENTS roscpp roslib std_msgs nav_msgs)
 add_definitions(-DROS_AVAILABLE=1)

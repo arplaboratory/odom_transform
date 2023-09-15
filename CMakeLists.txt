@@ -1,14 +1,9 @@
 cmake_minimum_required(VERSION 3.3)
 project(odom_transform)
 
-# Include libraries (if we don't have opencv 4, then fallback to opencv 3)
-# The OpenCV version needs to match the one used by cv_bridge otherwise you will get a segmentation fault!
-if (NOT OpenCV_FOUND)
-    find_package(OpenCV 4 REQUIRED)
-endif ()
 find_package(Boost REQUIRED COMPONENTS system filesystem thread date_time)
 find_package(Ceres REQUIRED)
-message(STATUS "OPENCV: " ${OpenCV_VERSION} " | BOOST: " ${Boost_VERSION} " | CERES: " ${Ceres_VERSION})
+message(STATUS " | BOOST: " ${Boost_VERSION} " | CERES: " ${Ceres_VERSION})
 
 # We need c++14 for ROS2, thus just require it for everybody
 # NOTE: To future self, hope this isn't an issue...
