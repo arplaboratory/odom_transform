@@ -2,7 +2,7 @@
 
 **Developer: Chenyu Wang, Yang Zhou<br />
 Affiliation: [NYU ARPL](https://wp.nyu.edu/arpl/)<br />
-Maintainer: Yang Zhou (yangzhou@nyu.edu) Jiuhong Xiao (jx1190@nyu.edu)<br />**
+Maintainer: Yang Zhou (yangzhou@nyu.edu) Yash Shetye (ys5153@nyu.edu) Jiuhong Xiao (jx1190@nyu.edu)<br />**
 
 ## Description
 This package transforms the input odometry between two frames, including pose and velocity.

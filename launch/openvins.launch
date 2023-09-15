@@ -3,15 +3,14 @@
 
     <group ns="$(arg mav_name)">
         <!--node pkg="nodelet" type="nodelet" args="manager"
-            name="ovmsckf_nodelet_manager" output="screen"> 
+            name="ovinterface_nodelet_manager" output="screen"> 
         </node-->
 
-        <node pkg="nodelet" type="nodelet" args="load odom_transform_nodelet/OvtransformNodeletClass ovmsckf_nodelet_manager"
+        <node pkg="nodelet" type="nodelet" args="load odom_transform_nodelet/OvtransformNodeletClass ovinterface_nodelet_manager"
             name="odom_transform_nodelet" output="screen">
             <param name="odom_transform_config_path" type="string" value="$(find odom_transform)/config/transform.yaml" />
             <rosparam file="$(find odom_transform)/config/transform.yaml" subst_value="true"/>
-            <param name="mav_name" type="string" value="$(arg mav_name)"/>
-            <remap from="~odomimu" to="OvmsckfNodeletClass_loader/odomimu"/>
+            <remap from="~odomimu" to="OvinterfaceNodeletClass_loader/odomimu"/>
 	    </node>
     </group>
 </launch>

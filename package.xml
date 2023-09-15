@@ -1,27 +1,53 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>odom_transform</name>
   <version>0.0.0</version>
-  <description>pose in imu frame to body frame transform</description>
-
+  <description>TODO: Package description</description>
   <author email="cw4030@nyu.edu">Chenyu</author>
   <maintainer email="cw4030@nyu.edu">Chenyu</maintainer>
+  <maintainer email="yangzhou@nyu.edu">Yang Zhou</maintainer>
+  <maintainer email="ys5153@nyu.edu">Yash Shetye</maintainer>
+  <maintainer email="jx1190@nyu.edu">Jiuhong Xiao</maintainer>
+  <license>TODO: License declaration</license>
 
-  <license>BSD</license>
+  <!-- ROS1: Dependencies needed to compile this package. -->
+  <buildtool_depend condition="$ROS_VERSION == 1">catkin</buildtool_depend>
+  <depend condition="$ROS_VERSION == 1">cmake_modules</depend>
+  <depend condition="$ROS_VERSION == 1">roscpp</depend>
+  <depend condition="$ROS_VERSION == 1">roslib</depend>
+  <depend condition="$ROS_VERSION == 1">rosbag</depend>
+  <depend condition="$ROS_VERSION == 1">tf</depend>
+  <depend condition="$ROS_VERSION == 1">std_msgs</depend>
+  <depend condition="$ROS_VERSION == 1">sensor_msgs</depend>
+  <depend condition="$ROS_VERSION == 1">nav_msgs</depend>
 
+  <!-- ROS2: Dependencies needed to compile this package. -->
+  <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
+  <depend condition="$ROS_VERSION == 2">rclcpp</depend>
+  <depend condition="$ROS_VERSION == 2">std_msgs</depend>
+  <depend condition="$ROS_VERSION == 2">sensor_msgs</depend>
+  <depend condition="$ROS_VERSION == 2">nav_msgs</depend>
+  <depend condition="$ROS_VERSION == 2">rclcpp_components</depend>
+
+  <!-- System dependencies for both versions -->
+  <depend>eigen</depend>
+  <depend>libopencv-dev</depend>
+  <depend>libopencv-contrib-dev</depend>
+  <depend>boost</depend>
+  <depend>libceres-dev</depend>
   <buildtool_depend>catkin</buildtool_depend>
-
-  <depend>roscpp</depend>
-  <depend>roslib</depend>
-  <depend>sensor_msgs</depend>
-  <depend>std_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>tf</depend>
+  <build_depend>roscpp</build_depend>
   <build_depend>nodelet</build_depend>
+  <exec_depend>roscpp</exec_depend>
   <exec_depend>nodelet</exec_depend>
+  
+  <!-- Note the export is required to expose the executables -->
+  <export>
+      <build_type condition="$ROS_VERSION == 1">catkin</build_type>
+      <build_type condition="$ROS_VERSION == 2">ament_cmake</build_type>
+      <rosdoc config="rosdoc.yaml" />
+      <nodelet plugin="${prefix}/transform_nodelet.xml" />
+  </export>
 
-    <export>
-        <nodelet plugin="${prefix}/transform_nodelet.xml" />
-    </export>
 </package>
-
