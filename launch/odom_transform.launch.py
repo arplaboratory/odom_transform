@@ -29,7 +29,7 @@ def generate_launch_description():
     # Loading the odom transform composable node
     odom_transform_node = ComposableNode(
         namespace=LaunchConfiguration("namespace_odom"),
-        package='odom_transform_ros2',
+        package='odom_transform',
         plugin='transform_nodelet_ns::OvtransformNodeletClass',
         name='odom_transform_node',
         parameters=[{'transform_config_path' : transform_config_path},
