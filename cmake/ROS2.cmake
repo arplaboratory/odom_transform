@@ -45,6 +45,7 @@ ament_target_dependencies(odom_transform_node
     nav_msgs
     sensor_msgs
     yaml-cpp
+    rclcpp_components
 )
 target_link_libraries(odom_transform_node ${YAML_CPP_LIBRARIES})
 # Register the libraries as composable nodes
