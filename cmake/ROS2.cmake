@@ -24,6 +24,8 @@ find_package(nav_msgs REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
@@ -46,6 +48,8 @@ ament_target_dependencies(odom_transform_node
     sensor_msgs
     yaml-cpp
     rclcpp_components
+    tf2
+    tf2_ros
 )
 target_link_libraries(odom_transform_node ${YAML_CPP_LIBRARIES})
 # Register the libraries as composable nodes
