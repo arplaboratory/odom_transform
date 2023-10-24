@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.3)
 project(odom_transform)
 
-find_package(catkin QUIET COMPONENTS roscpp roslib sensor_msgs)
 find_package(Eigen3 REQUIRED)
 
-find_package(catkin QUIET COMPONENTS roscpp roslib std_msgs nav_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp roslib sensor_msgs std_msgs nav_msgs tf nodelet)
 add_definitions(-DROS_AVAILABLE=1)
-catkin_package(CATKIN_DEPENDS roscpp roslib std_msgs nav_msgs)
+catkin_package(CATKIN_DEPENDS roscpp roslib sensor_msgs std_msgs nav_msgs tf)
 
 include_directories(src ${catkin_INCLUDE_DIRS})
 add_definitions(-std=c++17)
@@ -16,11 +15,6 @@ list(APPEND thirdparty_libraries
         ${OpenCV_LIBRARIES}
         ${CERES_LIBRARIES}
         ${catkin_LIBRARIES}
-)
-
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  nodelet
 )
 
 catkin_package(
