@@ -56,8 +56,6 @@ namespace transform_nodelet_ns
             rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_odomimu;
             rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odomworldB0;
             rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odomworld;
-            nav_msgs::msg::Odometry::SharedPtr odomBinW;
-            nav_msgs::msg::Odometry::SharedPtr odomBinB0;
             bool got_init_tf = false;
             bool init_world_with_vicon = false;
             int skip_count = 0;

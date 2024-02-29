@@ -182,14 +182,10 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
         got_init_tf = true;
     }
 
-    if (!odomBinW) {
-        odomBinW = std::make_shared<nav_msgs::msg::Odometry>();
-        odomBinW->header.frame_id = "world";
-    }
-    if (!odomBinB0) {
-        odomBinB0 = std::make_shared<nav_msgs::msg::Odometry>();
-        odomBinB0->header.frame_id = "odom";
-    }
+    auto odomBinW = std::make_unique<nav_msgs::msg::Odometry>();
+    odomBinW->header.frame_id = "world";
+    auto odomBinB0 = std::make_unique<nav_msgs::msg::Odometry>();
+    odomBinB0->header.frame_id = "odom";
     odomBinW->header.stamp = odomIinM.header.stamp;
     odomBinB0->header.stamp = odomIinM.header.stamp;
 
@@ -289,8 +285,8 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     //   odomBinW.pose.covariance(14));
     // }
 
-    pub_odomworld->publish(*odomBinW);
-    pub_odomworldB0->publish(*odomBinB0);
+    pub_odomworld->publish(std::move(odomBinW));
+    pub_odomworldB0->publish(std::move(odomBinB0));
 }
 }  // namespace transform_nodelet_ns
 
