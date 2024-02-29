@@ -74,17 +74,16 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
     RCLCPP_INFO(this->get_logger(), "T_cam_imu:");
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 4; ++j) {
-            T_ItoC(i,j) = T_cam_imu["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
+            T_ItoC(i, j) = T_cam_imu["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
             RCLCPP_INFO(this->get_logger(), "  r%d_c%d: %f", i, j,
                         T_cam_imu["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>());
-                
         }
     }
 
     RCLCPP_INFO(this->get_logger(), "T_cam_body:");
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 4; ++j) {
-            T_CtoB(i,j) = T_cam_body["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
+            T_CtoB(i, j) = T_cam_body["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
             RCLCPP_INFO(this->get_logger(), "  r%d_c%d: %f", i, j,
                         T_cam_body["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>());
         }
@@ -93,7 +92,7 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
     RCLCPP_INFO(this->get_logger(), "T_B0_W:");
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 4; ++j) {
-            T_B0toW(i,j) = T_B0_W["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
+            T_B0toW(i, j) = T_B0_W["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
             RCLCPP_INFO(this->get_logger(), "  r%d_c%d: %f", i, j,
                         T_B0_W["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>());
         }
