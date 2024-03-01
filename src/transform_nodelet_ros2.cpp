@@ -74,17 +74,16 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
     RCLCPP_INFO(this->get_logger(), "T_cam_imu:");
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 4; ++j) {
-            T_ItoC(i,j) = T_cam_imu["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
+            T_ItoC(i, j) = T_cam_imu["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
             RCLCPP_INFO(this->get_logger(), "  r%d_c%d: %f", i, j,
                         T_cam_imu["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>());
-                
         }
     }
 
     RCLCPP_INFO(this->get_logger(), "T_cam_body:");
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 4; ++j) {
-            T_CtoB(i,j) = T_cam_body["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
+            T_CtoB(i, j) = T_cam_body["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
             RCLCPP_INFO(this->get_logger(), "  r%d_c%d: %f", i, j,
                         T_cam_body["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>());
         }
@@ -93,7 +92,7 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
     RCLCPP_INFO(this->get_logger(), "T_B0_W:");
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 4; ++j) {
-            T_B0toW(i,j) = T_B0_W["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
+            T_B0toW(i, j) = T_B0_W["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>();
             RCLCPP_INFO(this->get_logger(), "  r%d_c%d: %f", i, j,
                         T_B0_W["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>());
         }
@@ -182,14 +181,10 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
         got_init_tf = true;
     }
 
-    if (!odomBinW) {
-        odomBinW = std::make_shared<nav_msgs::msg::Odometry>();
-        odomBinW->header.frame_id = "world";
-    }
-    if (!odomBinB0) {
-        odomBinB0 = std::make_shared<nav_msgs::msg::Odometry>();
-        odomBinB0->header.frame_id = "odom";
-    }
+    auto odomBinW = std::make_unique<nav_msgs::msg::Odometry>();
+    odomBinW->header.frame_id = "world";
+    auto odomBinB0 = std::make_unique<nav_msgs::msg::Odometry>();
+    odomBinB0->header.frame_id = "odom";
     odomBinW->header.stamp = odomIinM.header.stamp;
     odomBinB0->header.stamp = odomIinM.header.stamp;
 
@@ -289,8 +284,8 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     //   odomBinW.pose.covariance(14));
     // }
 
-    pub_odomworld->publish(*odomBinW);
-    pub_odomworldB0->publish(*odomBinB0);
+    pub_odomworld->publish(std::move(odomBinW));
+    pub_odomworldB0->publish(std::move(odomBinB0));
 }
 }  // namespace transform_nodelet_ns
 
