@@ -98,13 +98,12 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
                         T_B0_W["r" + std::to_string(i)]["c" + std::to_string(j)].as<double>());
         }
     }
-
+    mav_name = this->declare_parameter("mav_name", std::string("Value"));
+    this->get_parameter("mav_name", mav_name);
     init_world_with_vicon = config["init_world_with_vicon"].as<bool>();
 
     // TODO: Check this part with Vicon later
     if (init_world_with_vicon) {
-        mav_name = this->declare_parameter("mav_name", std::string("Value"));
-        this->get_parameter("mav_name", mav_name);
         std::string viconOdomWTopic1 = config["viconOdomWTopic_ros2"].as<std::string>();
         std::string viconOdomWTopic = "/" + mav_name + viconOdomWTopic1;
         auto sharedInitBodyOdominW = std::make_shared<nav_msgs::msg::Odometry>();
@@ -282,19 +281,19 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     //   PRINT_ERROR(RED "Drift detected: pose covariance of z-z is too high %.6f\n",
     //   odomBinW.pose.covariance(14));
     // }
-
+    nav_msgs::msg::Odometry frame_odom_W = *odomBinW; //Storing the data before its moved out of the smart pointer when its published.
+    nav_msgs::msg::Odometry frame_odom_B0 = *odomBinB0;
     pub_odomworld->publish(std::move(odomBinW));
     pub_odomworldB0->publish(std::move(odomBinB0));
     // If publish tf is set, publish both odom transforms : BinB0 and Binworld frames. 
     // TODO: Check to see if there are any subscribers before publishing this data. It might slow down the network.
-    if (publish_tf) {
-    		 nav_msgs::msg::Odometry frame_odom = *odomBinW; 
-                geometry_msgs::msg::TransformStamped trans = get_stamped_transform_from_odom(frame_odom); //Get the transform stamped message from the function.
+    if (publish_tf) { 
+    		
+                geometry_msgs::msg::TransformStamped trans = get_stamped_transform_from_odom(frame_odom_W); //Get the transform stamped message from the function.
                 trans.header.frame_id = "world";
                 trans.child_frame_id = mav_name + "/body";
                 mTfBr.sendTransform(trans); //Publish the tranform odom w.r.t world frame
-                frame_odom = *odomBinB0;
-                trans = get_stamped_transform_from_odom(frame_odom); //Get the transform stamped message from the function.
+                trans = get_stamped_transform_from_odom(frame_odom_B0); //Get the transform stamped message from the function.
                 trans.header.frame_id = mav_name + "/odom";
                 trans.child_frame_id = mav_name + "/body";
                 mTfBr.sendTransform(trans);// Publish the transform of odom w.r.t initial odom value.
