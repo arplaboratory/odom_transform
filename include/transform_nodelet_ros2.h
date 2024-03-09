@@ -4,6 +4,11 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <chrono>
 #include <Eigen/Eigen>
+#include "tf2_ros/transform_broadcaster.h"
+#include "geometry_msgs/msg/transform_stamped.h"
+#include "geometry_msgs/msg/quaternion.hpp"
+#include "geometry_msgs/msg/vector3.h"
+
 
 namespace transform_nodelet_ns
 {
@@ -58,8 +63,11 @@ namespace transform_nodelet_ns
             rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odomworld;
             bool got_init_tf = false;
             bool init_world_with_vicon = false;
+            bool publish_tf = true;
             int skip_count = 0;
-
+            std::string mav_name;
+	     
+            tf2_ros::TransformBroadcaster mTfBr; //tf object responsible for publishing frames between world and body or odom and body
             double pub_frequency = 0.0;
             std::chrono::high_resolution_clock::time_point last_timestamp{};
             std::chrono::high_resolution_clock::time_point current_timestamp{};
@@ -67,6 +75,21 @@ namespace transform_nodelet_ns
             float odom_rate = 0;
 
     };
+    // This function creates the tf message to be published. Takes input from odom and outputs a msg of type geometry_msgs::msg::TransformStamped 
+    inline geometry_msgs::msg::TransformStamped get_stamped_transform_from_odom(nav_msgs::msg::Odometry &odom) {
+            auto q_ItoC = odom.pose.pose.orientation;
+            auto p_CinI = odom.pose.pose.position;
+            geometry_msgs::msg::TransformStamped trans;
+            trans.header.stamp = odom.header.stamp;
+            //geometry_msgs::msg::Quaternion quat = q_ItoC;//(q_ItoC.x, q_ItoC.y, q_ItoC.z, q_ItoC.w)
+            trans.transform.rotation = q_ItoC;
+            geometry_msgs::msg::Vector3 orig; //(p_CinI.x, p_CinI.y, p_CinI.z)
+            orig.x = p_CinI.x;
+            orig.y = p_CinI.y;
+            orig.z = p_CinI.z;
+            trans.transform.translation = orig;
+            return trans;
+    }
 
     inline Eigen::Matrix<double, 3, 3> skew_x(const Eigen::Matrix<double, 3, 1> &w) {
         Eigen::Matrix<double, 3, 3> w_x;

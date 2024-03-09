@@ -10,7 +10,7 @@ namespace transform_nodelet_ns {
 
 // Creating constructor
 OvtransformNodeletClass::OvtransformNodeletClass(const rclcpp::NodeOptions& transform_node)
-    : Node("odom_transform_nodelet", transform_node) {
+    : Node("odom_transform_nodelet", transform_node),mTfBr(this) {
     onInit();  // Calling the onInit function
 }
 
@@ -52,6 +52,7 @@ void OvtransformNodeletClass::setup(const std::string transform_config_path) {
 
     imu_rate = config["imu_rate"].as<float>();
     odom_rate = config["odom_rate"].as<float>();
+    publish_tf = config["publish_tf"].as<bool>(); //Get whether we should publish tf or not
 
     RCLCPP_INFO(this->get_logger(), "[odom_transform] imu_rate: %f", imu_rate);
     RCLCPP_INFO(this->get_logger(), "[odom_transform] odom_rate: %f", odom_rate);
@@ -102,7 +103,6 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
 
     // TODO: Check this part with Vicon later
     if (init_world_with_vicon) {
-        std::string mav_name;
         mav_name = this->declare_parameter("mav_name", std::string("Value"));
         this->get_parameter("mav_name", mav_name);
         std::string viconOdomWTopic1 = config["viconOdomWTopic_ros2"].as<std::string>();
@@ -184,13 +184,12 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     auto odomBinW = std::make_unique<nav_msgs::msg::Odometry>();
     odomBinW->header.frame_id = "world";
     auto odomBinB0 = std::make_unique<nav_msgs::msg::Odometry>();
-    odomBinB0->header.frame_id = "odom";
+    odomBinB0->header.frame_id = mav_name + "/odom";
     odomBinW->header.stamp = odomIinM.header.stamp;
     odomBinB0->header.stamp = odomIinM.header.stamp;
 
     q_GinI_eigen << odomIinM.pose.pose.orientation.x, odomIinM.pose.pose.orientation.y,
         odomIinM.pose.pose.orientation.z, odomIinM.pose.pose.orientation.w;
-    ;
 
     T_ItoM.block(0, 0, 3, 3) = quat_2_Rot(q_GinI_eigen).transpose();  // this is right-handed JPL->right-handed
 
@@ -254,7 +253,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     odomBinB0->pose.pose.position.z = position_BinB0(2);
 
     // The TWIST component (angular and linear velocities)
-    odomBinW->child_frame_id = "body";
+    odomBinW->child_frame_id = mav_name + "/body";
     odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
     odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
     odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
@@ -263,7 +262,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     odomBinW->twist.twist.angular.z = w_BinB(2);
     ;  // we do not estimate this...
 
-    odomBinB0->child_frame_id = "body";
+    odomBinB0->child_frame_id = mav_name + "/body";
     odomBinB0->twist.twist.linear.x = v_BinB0(0);  // vel in world frame
     odomBinB0->twist.twist.linear.y = v_BinB0(1);  // vel in world frame
     odomBinB0->twist.twist.linear.z = v_BinB0(2);  // vel in world frame
@@ -286,6 +285,20 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
 
     pub_odomworld->publish(std::move(odomBinW));
     pub_odomworldB0->publish(std::move(odomBinB0));
+    // If publish tf is set, publish both odom transforms : BinB0 and Binworld frames. 
+    // TODO: Check to see if there are any subscribers before publishing this data. It might slow down the network.
+    if (publish_tf) {
+    		 nav_msgs::msg::Odometry frame_odom = *odomBinW; 
+                geometry_msgs::msg::TransformStamped trans = get_stamped_transform_from_odom(frame_odom); //Get the transform stamped message from the function.
+                trans.header.frame_id = "world";
+                trans.child_frame_id = mav_name + "/body";
+                mTfBr.sendTransform(trans); //Publish the tranform odom w.r.t world frame
+                frame_odom = *odomBinB0;
+                trans = get_stamped_transform_from_odom(frame_odom); //Get the transform stamped message from the function.
+                trans.header.frame_id = mav_name + "/odom";
+                trans.child_frame_id = mav_name + "/body";
+                mTfBr.sendTransform(trans);// Publish the transform of odom w.r.t initial odom value.
+            }
 }
 }  // namespace transform_nodelet_ns
 
