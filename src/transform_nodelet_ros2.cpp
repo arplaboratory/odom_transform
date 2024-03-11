@@ -233,44 +233,70 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
 
     Eigen::Vector3d v_BinB0 = R_BtoB0 * v_BinB;
     Eigen::Vector3d v_BinW = R_BtoW * v_BinB;
-
+    //Check to see if there are any subscribers before publishing the odometry BinWorld
+    //TODO: To incorporate multi-robot operations, and enable loop closure, we need to define the relation between world, map and race/odom. So the existing pipeline needs to be modified.
+    //TODO: There needs to be a way to define the relative trasnformations between multiple drones/agents through the config file in arpl_autonomy
+    if(pub_odomworld->get_subscription_count() > 0)
+    {
     // The POSE component (orientation and position)
-    odomBinW->pose.pose.orientation.x = q_BinW.x();
-    odomBinW->pose.pose.orientation.y = q_BinW.y();
-    odomBinW->pose.pose.orientation.z = q_BinW.z();
-    odomBinW->pose.pose.orientation.w = q_BinW.w();
-    odomBinW->pose.pose.position.x = position_BinW(0);
-    odomBinW->pose.pose.position.y = position_BinW(1);
-    odomBinW->pose.pose.position.z = position_BinW(2);
+	    odomBinW->pose.pose.orientation.x = q_BinW.x();
+	    odomBinW->pose.pose.orientation.y = q_BinW.y();
+	    odomBinW->pose.pose.orientation.z = q_BinW.z();
+	    odomBinW->pose.pose.orientation.w = q_BinW.w();
+	    odomBinW->pose.pose.position.x = position_BinW(0);
+	    odomBinW->pose.pose.position.y = position_BinW(1);
+	    odomBinW->pose.pose.position.z = position_BinW(2);
+	    
+	     // The TWIST component (angular and linear velocities)
+	    odomBinW->child_frame_id = mav_name + "/body";
+	    odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
+	    odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
+	    odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
+	    odomBinW->twist.twist.angular.x = w_BinB(0);  // we do not estimate this...
+	    odomBinW->twist.twist.angular.y = w_BinB(1);  // we do not estimate this...
+	    odomBinW->twist.twist.angular.z = w_BinB(2);
+	    ;  // we do not estimate this...
+	    odomBinW->pose.covariance = odomIinM.pose.covariance;
+	    //If publish tf is set, publish odom transforms tf frames : Binworld frame.
+	    if (publish_tf) { 
+    		
+                geometry_msgs::msg::TransformStamped trans_w = get_stamped_transform_from_odom(*odomBinW); //Get the transform stamped message from the function.
+                trans_w.header.frame_id = "world";
+                trans_w.child_frame_id = mav_name + "/body";
+                mTfBr.sendTransform(trans_w); //Publish the tranform odom w.r.t world frame
+                }
+    	    pub_odomworld->publish(std::move(odomBinW));
+            
+     }
+    //Check to see if there are any subscribers before publishing the odometry BinB0
+    if(pub_odomworldB0->get_subscription_count() > 0)
+    {
+	    odomBinB0->pose.pose.orientation.x = q_BinB0.x();
+	    odomBinB0->pose.pose.orientation.y = q_BinB0.y();
+	    odomBinB0->pose.pose.orientation.z = q_BinB0.z();
+	    odomBinB0->pose.pose.orientation.w = q_BinB0.w();
+	    odomBinB0->pose.pose.position.x = position_BinB0(0);
+	    odomBinB0->pose.pose.position.y = position_BinB0(1);
+	    odomBinB0->pose.pose.position.z = position_BinB0(2);
 
-    odomBinB0->pose.pose.orientation.x = q_BinB0.x();
-    odomBinB0->pose.pose.orientation.y = q_BinB0.y();
-    odomBinB0->pose.pose.orientation.z = q_BinB0.z();
-    odomBinB0->pose.pose.orientation.w = q_BinB0.w();
-    odomBinB0->pose.pose.position.x = position_BinB0(0);
-    odomBinB0->pose.pose.position.y = position_BinB0(1);
-    odomBinB0->pose.pose.position.z = position_BinB0(2);
-
-    // The TWIST component (angular and linear velocities)
-    odomBinW->child_frame_id = mav_name + "/body";
-    odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
-    odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
-    odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
-    odomBinW->twist.twist.angular.x = w_BinB(0);  // we do not estimate this...
-    odomBinW->twist.twist.angular.y = w_BinB(1);  // we do not estimate this...
-    odomBinW->twist.twist.angular.z = w_BinB(2);
-    ;  // we do not estimate this...
-
-    odomBinB0->child_frame_id = mav_name + "/body";
-    odomBinB0->twist.twist.linear.x = v_BinB0(0);  // vel in world frame
-    odomBinB0->twist.twist.linear.y = v_BinB0(1);  // vel in world frame
-    odomBinB0->twist.twist.linear.z = v_BinB0(2);  // vel in world frame
-    odomBinB0->twist.twist.angular.x = w_BinB(0);  // we do not estimate this...
-    odomBinB0->twist.twist.angular.y = w_BinB(1);  // we do not estimate this...
-    odomBinB0->twist.twist.angular.z = w_BinB(2);  // we do not estimate this...
-
-    odomBinW->pose.covariance = odomIinM.pose.covariance;
-    odomBinB0->pose.covariance = odomIinM.pose.covariance;
+	    odomBinB0->child_frame_id = mav_name + "/body";
+	    odomBinB0->twist.twist.linear.x = v_BinB0(0);  // vel in world frame
+	    odomBinB0->twist.twist.linear.y = v_BinB0(1);  // vel in world frame
+	    odomBinB0->twist.twist.linear.z = v_BinB0(2);  // vel in world frame
+	    odomBinB0->twist.twist.angular.x = w_BinB(0);  // we do not estimate this...
+	    odomBinB0->twist.twist.angular.y = w_BinB(1);  // we do not estimate this...
+	    odomBinB0->twist.twist.angular.z = w_BinB(2);  // we do not estimate this...
+	    odomBinB0->pose.covariance = odomIinM.pose.covariance;
+	    //If publish tf is set, publish odom transforms tf frames : BinB0 frame.
+	    if(publish_tf)
+	    {
+	    	 geometry_msgs::msg::TransformStamped trans_B0 = get_stamped_transform_from_odom(*odomBinB0); //Get the transform stamped message from the function.
+                trans_B0.header.frame_id = mav_name + "/odom";
+                trans_B0.child_frame_id = mav_name + "/body";
+                mTfBr.sendTransform(trans_B0);// Publish the transform of odom w.r.t initial odom value.
+            }
+    	    pub_odomworldB0->publish(std::move(odomBinB0));
+    }
     // if ( odomBinW.pose.covariance(0) > 0.05){
     //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n", odomBinW.pose.covariance(0));
     // }
@@ -281,23 +307,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     //   PRINT_ERROR(RED "Drift detected: pose covariance of z-z is too high %.6f\n",
     //   odomBinW.pose.covariance(14));
     // }
-    nav_msgs::msg::Odometry frame_odom_W = *odomBinW; //Storing the data before its moved out of the smart pointer when its published.
-    nav_msgs::msg::Odometry frame_odom_B0 = *odomBinB0;
-    pub_odomworld->publish(std::move(odomBinW));
-    pub_odomworldB0->publish(std::move(odomBinB0));
-    // If publish tf is set, publish both odom transforms : BinB0 and Binworld frames. 
-    // TODO: Check to see if there are any subscribers before publishing this data. It might slow down the network.
-    if (publish_tf) { 
-    		
-                geometry_msgs::msg::TransformStamped trans = get_stamped_transform_from_odom(frame_odom_W); //Get the transform stamped message from the function.
-                trans.header.frame_id = "world";
-                trans.child_frame_id = mav_name + "/body";
-                mTfBr.sendTransform(trans); //Publish the tranform odom w.r.t world frame
-                trans = get_stamped_transform_from_odom(frame_odom_B0); //Get the transform stamped message from the function.
-                trans.header.frame_id = mav_name + "/odom";
-                trans.child_frame_id = mav_name + "/body";
-                mTfBr.sendTransform(trans);// Publish the transform of odom w.r.t initial odom value.
-            }
+
 }
 }  // namespace transform_nodelet_ns
 
