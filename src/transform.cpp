@@ -187,14 +187,14 @@ void Transform_calculator::odomCallback(const nav_msgs::Odometry::ConstPtr &msg_
         odomBinW->pose.covariance = odomIinM.pose.covariance;
 
         pub_odomworld.publish(odomBinW);
-        /*
-            if (publish_tf) {
-                tf::StampedTransform trans = get_stamped_transform_from_odom(odomBinW);
-                trans.frame_id_ = "world";
-                trans.child_frame_id_ = mav_name + "/body";
-                mTfBr.sendTransform(trans);
-            }
-        */
+
+        if (publish_tf) {
+            tf::StampedTransform trans = get_stamped_transform_from_odom(odomBinW);
+            trans.frame_id_ = "world";
+            trans.child_frame_id_ = mav_name + "/body";
+            mTfBr.sendTransform(trans);
+        }
+
         // if ( odomBinW.pose.covariance(0) > 0.05){
         //   PRINT_ERROR(RED "Drift detected: pose covariance of x-x is too high %.6f\n",
         //   odomBinW.pose.covariance(0));

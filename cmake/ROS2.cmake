@@ -21,6 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -46,6 +47,7 @@ ament_target_dependencies(odom_transform_node
     std_msgs
     nav_msgs
     sensor_msgs
+    geometry_msgs
     yaml-cpp
     rclcpp_components
     tf2

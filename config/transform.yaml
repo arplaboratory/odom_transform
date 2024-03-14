@@ -3,6 +3,7 @@ odom_rate: 150.0
 init_world_with_vicon: false
 viconOdomWTopic: "/$(optenv MAV_NAME quadrotor)/odom"
 viconOdomWTopic_ros2: "/odom"
+publish_tf: true
 
 T_cam_imu:
   r0: {c0: 1.0, c1: 0.0, c2: 0.0, c3: -0.04402011600452833}
