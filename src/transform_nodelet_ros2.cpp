@@ -249,7 +249,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
         odomBinW->pose.pose.position.z = position_BinW(2);
 
         // The TWIST component (angular and linear velocities)
-        odomBinW->child_frame_id = mav_name + "/body";
+        odomBinW->child_frame_id = mav_name + "/base_link";
         odomBinW->twist.twist.linear.x = v_BinW(0);   // vel in world frame
         odomBinW->twist.twist.linear.y = v_BinW(1);   // vel in world frame
         odomBinW->twist.twist.linear.z = v_BinW(2);   // vel in world frame
@@ -263,7 +263,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
             geometry_msgs::msg::TransformStamped trans_w = get_stamped_transform_from_odom(
                 *odomBinW);  // Get the transform stamped message from the function.
             trans_w.header.frame_id = "world";
-            trans_w.child_frame_id = mav_name + "/body";
+            trans_w.child_frame_id = mav_name + "/base_link";
             mTfBr.sendTransform(trans_w);  // Publish the tranform odom w.r.t world frame
         }
         pub_odomworld->publish(std::move(odomBinW));
@@ -278,7 +278,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
         odomBinB0->pose.pose.position.y = position_BinB0(1);
         odomBinB0->pose.pose.position.z = position_BinB0(2);
 
-        odomBinB0->child_frame_id = mav_name + "/body";
+        odomBinB0->child_frame_id = mav_name + "/base_link";
         odomBinB0->twist.twist.linear.x = v_BinB0(0);  // vel in world frame
         odomBinB0->twist.twist.linear.y = v_BinB0(1);  // vel in world frame
         odomBinB0->twist.twist.linear.z = v_BinB0(2);  // vel in world frame
@@ -291,7 +291,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
             geometry_msgs::msg::TransformStamped trans_B0 = get_stamped_transform_from_odom(
                 *odomBinB0);  // Get the transform stamped message from the function.
             trans_B0.header.frame_id = mav_name + "/odom";
-            trans_B0.child_frame_id = mav_name + "/body";
+            trans_B0.child_frame_id = mav_name + "/base_link";
             mTfBr.sendTransform(trans_B0);  // Publish the transform of odom w.r.t initial odom value.
         }
         pub_odomworldB0->publish(std::move(odomBinB0));
