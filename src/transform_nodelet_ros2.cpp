@@ -159,7 +159,7 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
 // Defining odomCallback function
 void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
     if (!rate_controller_->checkAndUpdate(msg->header.stamp)) {
-	return;
+        return;
     }
 
     nav_msgs::msg::Odometry odomIinM = *msg;
@@ -216,7 +216,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
                              odomIinM.twist.twist.angular.z);
     w_iinIMU = Eigen::Vector3d(odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y,
                                odomIinM.twist.twist.angular.z);
-    v_BinB = T_ItoB.block(0, 0, 3, 3) *(- skew_ItoB * w_iinIMU + v_iinIMU);
+    v_BinB = T_ItoB.block(0, 0, 3, 3) * (-skew_ItoB * w_iinIMU + v_iinIMU);
     Eigen::Quaterniond T_BinB0_from_q;
     Eigen::Quaterniond T_BinW_from_q;
     T_BinB0_from_q.x() = q_BinB0.x();
