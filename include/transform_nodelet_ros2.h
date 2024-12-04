@@ -20,6 +20,36 @@ namespace transform_nodelet_ns
             ~OvtransformNodeletClass();
             void onInit();
         private:
+	    struct RateController {
+		    double target_period;
+		    double token_deficit;
+		    rclcpp::Time last_update;
+		    bool first_msg;
+		    RateController (double rate)
+			    : target_period(0.95/rate)
+			    , token_deficit(0.0)
+		            , first_msg(false) {}
+
+		    bool checkAndUpdate(const rclcpp::Time& current_time) {
+			    if (!first_msg) {
+				    last_update = current_time;
+				    first_msg = true;
+				    return true;
+			    }
+
+			    double elapsed = (current_time - last_update).seconds();
+			    token_deficit += elapsed - target_period;
+
+			    token_deficit = std::min(target_period, std::max(-target_period, token_deficit));
+
+			    if (token_deficit >= 0.0) {
+				    last_update = current_time;
+				    return true;
+			    }
+			    return false;
+		    }
+	    };
+	    std::unique_ptr<RateController> rate_controller_;
             void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
             void setup(const std::string filePath);
             void setupTransformationMatrix(const std::string filePath);
@@ -64,13 +94,13 @@ namespace transform_nodelet_ns
             bool got_init_tf = false;
             bool init_world_with_vicon = false;
             bool publish_tf = true;
+	    bool bPublishBinB0 = false;
+	    bool bPublishBinW = false;
             int skip_count = 0;
             std::string mav_name;
 	     
             tf2_ros::TransformBroadcaster mTfBr; //tf object responsible for publishing frames between world and body or odom and body
             double pub_frequency = 0.0;
-            std::chrono::high_resolution_clock::time_point last_timestamp{};
-            std::chrono::high_resolution_clock::time_point current_timestamp{};
             float imu_rate = 0;
             float odom_rate = 0;
 
