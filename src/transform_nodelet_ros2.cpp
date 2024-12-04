@@ -53,11 +53,14 @@ void OvtransformNodeletClass::setup(const std::string transform_config_path) {
     imu_rate = config["imu_rate"].as<float>();
     odom_rate = config["odom_rate"].as<float>();
     publish_tf = config["publish_tf"].as<bool>();  // Get whether we should publish tf or not
+    bPublishBinB0 = config["publishBinB0"].as<bool>();
+    bPublishBinW = config["publishBinW"].as<bool>();
 
     RCLCPP_INFO(this->get_logger(), "[odom_transform] imu_rate: %f", imu_rate);
     RCLCPP_INFO(this->get_logger(), "[odom_transform] odom_rate: %f", odom_rate);
 
     pub_frequency = 1.0 / odom_rate;
+    rate_controller_ = std::make_unique<RateController>(odom_rate);
     setupTransformationMatrix(transform_config_path);  // Calling the setupTransformationMatrix function
 }
 
@@ -155,12 +158,9 @@ void OvtransformNodeletClass::setupTransformationMatrix(const std::string transf
 
 // Defining odomCallback function
 void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
-    current_timestamp = std::chrono::high_resolution_clock::now();
-    if (std::chrono::duration_cast<std::chrono::duration<double>>(current_timestamp - last_timestamp).count() <=
-        pub_frequency) {
-        return;
+    if (!rate_controller_->checkAndUpdate(msg->header.stamp)) {
+	return;
     }
-    last_timestamp = current_timestamp;
 
     nav_msgs::msg::Odometry odomIinM = *msg;
     if (!got_init_tf) {
@@ -196,9 +196,6 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
     T_ItoM(1, 3) = odomIinM.pose.pose.position.y;
     T_ItoM(2, 3) = odomIinM.pose.pose.position.z;
 
-    // T_ItoB0 = T_MtoB0 * T_ItoM;
-    // T_ItoW = T_MtoW * T_ItoM;
-
     T_ItoM = T_init_tf_inv * T_ItoM;
     T_BtoB0 = T_ItoB * T_ItoM * T_BtoI;
 
@@ -219,7 +216,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
                              odomIinM.twist.twist.angular.z);
     w_iinIMU = Eigen::Vector3d(odomIinM.twist.twist.angular.x, odomIinM.twist.twist.angular.y,
                                odomIinM.twist.twist.angular.z);
-    v_BinB = -T_ItoB.block(0, 0, 3, 3) * skew_ItoB * w_iinIMU + T_ItoB.block(0, 0, 3, 3) * v_iinIMU;
+    v_BinB = T_ItoB.block(0, 0, 3, 3) *(- skew_ItoB * w_iinIMU + v_iinIMU);
     Eigen::Quaterniond T_BinB0_from_q;
     Eigen::Quaterniond T_BinW_from_q;
     T_BinB0_from_q.x() = q_BinB0.x();
@@ -233,12 +230,11 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
 
     Eigen::Vector3d v_BinB0 = R_BtoB0 * v_BinB;
     Eigen::Vector3d v_BinW = R_BtoW * v_BinB;
-    // Check to see if there are any subscribers before publishing the odometry BinWorld
     // TODO: To incorporate multi-robot operations, and enable loop closure, we need to define the relation between
     // world, map and race/odom. So the existing pipeline needs to be modified.
     // TODO: There needs to be a way to define the relative trasnformations between multiple drones/agents through
     // the config file in arpl_autonomy
-    if (pub_odomworld->get_subscription_count() > 0) {
+    if (bPublishBinW) {
         // The POSE component (orientation and position)
         odomBinW->pose.pose.orientation.x = q_BinW.x();
         odomBinW->pose.pose.orientation.y = q_BinW.y();
@@ -268,8 +264,7 @@ void OvtransformNodeletClass::odomCallback(const nav_msgs::msg::Odometry::Shared
         }
         pub_odomworld->publish(std::move(odomBinW));
     }
-    // Check to see if there are any subscribers before publishing the odometry BinB0
-    if (pub_odomworldB0->get_subscription_count() > 0) {
+    if (bPublishBinB0) {
         odomBinB0->pose.pose.orientation.x = q_BinB0.x();
         odomBinB0->pose.pose.orientation.y = q_BinB0.y();
         odomBinB0->pose.pose.orientation.z = q_BinB0.z();
