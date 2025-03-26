@@ -2,8 +2,8 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>odom_transform</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <version>1.2.1</version>
+  <description>The odom_transform packag</description>
   <author email="cw4030@nyu.edu">Chenyu</author>
   <maintainer email="cw4030@nyu.edu">Chenyu</maintainer>
   <maintainer email="yangzhou@nyu.edu">Yang Zhou</maintainer>
@@ -38,11 +38,6 @@
   <depend>libopencv-contrib-dev</depend>
   <depend>boost</depend>
   <depend>libceres-dev</depend>
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>nodelet</build_depend>
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>nodelet</exec_depend>
   
   <!-- Note the export is required to expose the executables -->
   <export>
